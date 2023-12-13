@@ -2,7 +2,7 @@ name: "📆 Create monthly workout KR"
 
 on:
   schedule:
-    - cron: "0 1 1 1 * *"
+    - cron: "0 0 1 * *"
 
   workflow_dispatch:
     inputs:
@@ -14,7 +14,7 @@ on:
         required: false
 
 jobs:
-  set-workout-kr-current:
+  create-monthly-workout-kr:
     runs-on: ubuntu-latest
 
     env:
