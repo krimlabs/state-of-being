@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "cli": "doppler run -- bun src/cli.ts",
+    "cli:dev": "doppler run -- bun src/cli.ts",
+    "cli": "bun src/cli.ts",
     "test:watch": "doppler run -- bun test --watch",
     "test": "doppler run -- bun test"
   },
