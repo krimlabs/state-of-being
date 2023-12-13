@@ -1,9 +1,16 @@
-name: "🕛 Read the current state of workouts from Google Sheets and set it to Notion key result for this month"
+name: "🕛 Set workout KR current prop"
 
 on:
   schedule:
     - cron: '0 0 * * *'
-
+  workflow_dispatch:
+    inputs:
+      year:
+        description: 'Year for the command'
+        required: false
+      month:
+        description: 'Month for the command'
+        required: false
 jobs:
   run-command:
     runs-on: ubuntu-latest
@@ -22,4 +29,4 @@ jobs:
           bun-version: 'latest'
           
       - name: "🏃‍♂️ Fetch value and set on Notion"
-        run: bun run cli set-current-value-of-workout-key-result 
+        run: bun run cli set-current-value-of-workout-key-result -y ${{ matrix.year }} -m ${{ matrix.month }}
