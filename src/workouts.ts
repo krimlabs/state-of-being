@@ -1,3 +1,181 @@
-import config from "./config";
+import {
+  GoogleSpreadsheet,
+  GoogleSpreadsheetWorksheet,
+} from "google-spreadsheet";
+import config from "@src/config";
+import { getCurrentMonth, getCurrentYear } from "@src/time";
+import {
+  getNodeByWindmillState,
+  WindmillStateContains,
+  updateNotionPage,
+} from "@src/notion";
 
-console.log(config.NOTION_TOKEN);
+async function getHeaderValues(
+  sheet: GoogleSpreadsheetWorksheet,
+): Promise<string[]> {
+  await sheet.loadHeaderRow();
+  return sheet.headerValues;
+}
+
+function startsWithCapitalMonth(str: string): boolean {
+  const months =
+    /^(January|February|March|April|May|June|July|August|September|October|November|December)\s/i;
+  return months.test(str);
+}
+
+async function fetchSheetHeaderValues(sheetId: string, apiKey: string) {
+  const doc = new GoogleSpreadsheet(sheetId, {
+    apiKey,
+  });
+
+  await doc.loadInfo();
+
+  const headerValues = await Promise.all(
+    doc.sheetsByIndex.map(getHeaderValues),
+  );
+
+  const dates = headerValues
+    .flat()
+    .filter((dateString: string) => {
+      const parsedDate = Date.parse(dateString);
+      return !isNaN(parsedDate);
+    })
+    .filter(startsWithCapitalMonth)
+    .map((dateString: string) => new Date(dateString));
+
+  return dates;
+}
+
+type YearlyWorkoutAggregates = {
+  totalWorkouts: number;
+  averageWorkoutsPerMonth: number;
+  monthWithMostWorkouts: number;
+  monthWithLeastWorkouts: number;
+};
+
+function generateYearlyWorkoutAggregates(
+  countByMonth: Record<string, number>,
+): YearlyWorkoutAggregates | null {
+  if (!countByMonth) {
+    return null;
+  }
+
+  const months = Object.entries(countByMonth);
+
+  if (months.length === 0) {
+    return null;
+  }
+
+  const totalWorkouts = parseFloat(
+    months.reduce((acc, [, count]) => acc + count, 0).toFixed(2),
+  );
+
+  const averageWorkoutsPerMonth = parseFloat(
+    (totalWorkouts / months.length).toFixed(2),
+  );
+
+  const [monthWithMostWorkouts] = months.reduce(
+    (max, [month, count]) => (count > max[1] ? [month, count] : max),
+    ["", 0],
+  );
+
+  const [monthWithLeastWorkouts] = months.reduce(
+    (min, [month, count]) => (count < min[1] ? [month, count] : min),
+    ["", Infinity],
+  );
+  return {
+    totalWorkouts,
+    averageWorkoutsPerMonth,
+    monthWithMostWorkouts,
+    monthWithLeastWorkouts,
+  };
+}
+
+type WorkoutSheetData = {
+  countByYearMonth: Record<string, Record<string, number>>;
+  aggregates: YearlyWorkoutAggregates;
+};
+
+async function fetchWorkoutSheetData(): Promise<WorkoutSheetData> {
+  const dates = await fetchSheetHeaderValues(
+    config.workoutTrackerSheetId,
+    config.GOOGLE_SHEETS_API_KEY,
+  );
+
+  const countByYearMonth = dates.reduce<Record<number, Record<number, number>>>(
+    (acc, date) => {
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+
+      if (!acc[year]) {
+        acc[year] = {};
+      }
+
+      acc[year][month] = (acc[year][month] || 0) + 1;
+
+      return acc;
+    },
+    {},
+  );
+
+  const aggregates: YearlyWorkoutAggregates = Object.keys(
+    countByYearMonth,
+  ).reduce((acc, year: string) => {
+    return {
+      ...acc,
+      [year]: generateYearlyWorkoutAggregates(countByYearMonth[year]),
+    };
+  }, {});
+
+  return {
+    countByYearMonth,
+    aggregates,
+  };
+}
+
+async function setCurrentValueOfWorkoutKeyResult(
+  forYear?: number,
+  forMonth?: number,
+) {
+  const year = forYear || getCurrentYear();
+  const month = forMonth || getCurrentMonth();
+
+  const searchTerm = `${WindmillStateContains.AUTO_WORKOUTS}-${month}-${year}`;
+  const workoutKeyResult = await getNodeByWindmillState(
+    config.NOTION_TOKEN,
+    searchTerm,
+  );
+
+  if (workoutKeyResult.results.length > 0) {
+    const id = workoutKeyResult.results[0].id;
+    const sheetData = await fetchWorkoutSheetData();
+    const newVal = sheetData.countByYearMonth[year][month];
+
+    try {
+      await updateNotionPage(config.NOTION_TOKEN, id, {
+        properties: {
+          Current: {
+            number: newVal,
+          },
+        },
+      });
+      return { msg: "Workout key result current value updated", newVal, id };
+    } catch (error) {
+      return {
+        msg: "Unable to update workout key result current value",
+        newVal,
+        id,
+      };
+    }
+  }
+
+  return { msg: `Key Result for ${searchTerm} does not exist yet` };
+}
+
+export {
+  fetchWorkoutSheetData,
+  generateYearlyWorkoutAggregates,
+  WorkoutSheetData,
+  YearlyWorkoutAggregates,
+  setCurrentValueOfWorkoutKeyResult,
+};
