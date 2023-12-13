@@ -24,9 +24,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: "🍔 Set up Bun"
-        uses: actions/setup-bun@v1
-        with:
-          bun-version: 'latest'
+      - uses: oven-sh/setup-bun@v1
           
       - name: "🏃‍♂️ Fetch value and set on Notion"
-        run: bun run cli set-current-value-of-workout-key-result -y ${{ matrix.year }} -m ${{ matrix.month }}
+        run: bun run cli set-current-value-of-workout-key-result -y ${{ github.event.inputs.year }} -m ${{ github.event.inputs.month }}
