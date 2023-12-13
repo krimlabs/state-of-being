@@ -1,0 +1,25 @@
+name: "🕛 Read the current state of workouts from Google Sheets and set it to Notion key result for this month"
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  run-command:
+    runs-on: ubuntu-latest
+    
+    env:
+      NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+      GOOGLE_SHEETS_API_KEY: ${{ secrets.GOOGLE_SHEETS_API_KEY }}
+
+    steps:
+      - name: "📦 Checkout"
+        uses: actions/checkout@v2
+
+      - name: "🍔 Set up Bun"
+        uses: actions/setup-bun@v1
+        with:
+          bun-version: 'latest'
+          
+      - name: "🏃‍♂️ Fetch value and set on Notion"
+        run: bun run cli set-current-value-of-workout-key-result 
