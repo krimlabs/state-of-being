@@ -3,11 +3,18 @@ import {
   GoogleSpreadsheetWorksheet,
 } from "google-spreadsheet";
 import config from "@src/config";
-import { getCurrentMonth, getCurrentYear } from "@src/time";
+import {
+  getCurrentMonth,
+  getCurrentYear,
+  getWeekdaysInMonth,
+  getMonthName,
+} from "@src/time";
 import {
   getNodeByWindmillState,
   WindmillStateContains,
   updateNotionPage,
+  createMonthlyKeyResultPage,
+  Statuses,
 } from "@src/notion";
 
 async function getHeaderValues(
@@ -172,10 +179,48 @@ async function setCurrentValueOfWorkoutKeyResult(
   return { msg: `Key Result for ${searchTerm} does not exist yet` };
 }
 
+async function createMonthlyWorkoutKeyResult(
+  forYear?: number,
+  forMonth?: number,
+) {
+  const year = forYear || getCurrentYear();
+  const month = forMonth || getCurrentMonth();
+
+  const weekdays = getWeekdaysInMonth(year, month);
+  const monthName = getMonthName(month);
+  const title = `Workout ${weekdays} times during ${monthName}, ${year} ⁂`;
+  const targetWindmillState = `${WindmillStateContains.AUTO_WORKOUTS}-${month}-${year}`;
+  const emoji = "🐒";
+
+  try {
+    await createMonthlyKeyResultPage(
+      config.NOTION_TOKEN,
+      title,
+      weekdays,
+      [config.anchorNodeIds.workoutFiveTimesAWeekObj],
+      WindmillStateContains.AUTO_WORKOUTS,
+      targetWindmillState,
+      emoji,
+      Statuses.IN_PROGRESS,
+      year,
+      month,
+    );
+
+    return {
+      msg: "New key result created successfully",
+      title,
+      targetValue: weekdays,
+    };
+  } catch (error) {
+    return { msg: "Unable to create new page" };
+  }
+}
+
 export {
   fetchWorkoutSheetData,
   generateYearlyWorkoutAggregates,
   WorkoutSheetData,
   YearlyWorkoutAggregates,
   setCurrentValueOfWorkoutKeyResult,
+  createMonthlyWorkoutKeyResult,
 };

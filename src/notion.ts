@@ -8,7 +8,7 @@ import {
   QueryDatabaseResponse,
 } from "@notionhq/client";
 import config from "@src/config";
-import { getLastDayOfMonth } from "@src/time";
+import { getLastDayOfMonth, getCurrentMonth, getCurrentYear } from "@src/time";
 
 enum Properties {
   WINDMILL_STATE = "Windmill State",
@@ -237,6 +237,144 @@ async function getNodeByWindmillState(token: string, searchTerm: string) {
   return nodeRes;
 }
 
+/**
+ * Given a database id, a filter for windmill state, and a filter for current status.
+ * Sets the status of the fitlered records to new status
+ */
+async function markStatus(
+  token: string,
+  dbId: string,
+  filterWindmillStateContains: WindmillStateContains,
+  currentStatusEquals: Statuses,
+  markStatusAs: Statuses,
+) {
+  const res = await queryNotionDb(token, {
+    database_id: dbId,
+    page_size: 100,
+    filter: {
+      and: [
+        {
+          property: Properties.WINDMILL_STATE,
+          rich_text: {
+            contains: filterWindmillStateContains,
+          },
+        },
+        {
+          property: Properties.STATUS,
+          select: {
+            equals: currentStatusEquals,
+          },
+        },
+      ],
+    },
+  });
+
+  const pageIds = res.results.map((p) => p.id);
+  const updatedStatus = await Promise.all(
+    pageIds.map(async (id: string) => {
+      try {
+        const res = await updateNotionPage(token, id, {
+          properties: {
+            Status: {
+              select: {
+                name: markStatusAs,
+              },
+            },
+          },
+        });
+        return res;
+      } catch (e) {
+        console.log(e);
+      }
+    }),
+  );
+  return updatedStatus;
+}
+
+async function createMonthlyKeyResultPage(
+  token: string,
+  title: string,
+  targetValue: number,
+  relatedObjectives: string[],
+  // This is the type of Key Result we are creating: Workout, Meditation or Observations
+  forWindmillState: WindmillStateContains,
+  // This is the value of the state that will be set: AutoWorkout-11-2023
+  targetWindmillState: string,
+  emoji: string,
+  status: Statuses,
+  forYear?: number,
+  forMonth?: number,
+) {
+  const year = forYear || getCurrentYear();
+  const month = forMonth || getCurrentMonth();
+
+  const searchTerm = `${forWindmillState}-${month}-${year}`;
+  const keyResult = await getNodeByWindmillState(token, searchTerm);
+
+  if (keyResult.results.length > 0) {
+    // Page is already created, do nothing
+    return {
+      msg: "Key result already exists",
+      forWindmillState,
+      year,
+      month,
+      id: keyResult.results[0].id,
+    };
+  } else {
+    // Need to create page, start by marking all status for this as done
+    await markStatus(
+      token,
+      config.notionDbIds.nodes,
+      forWindmillState,
+      Statuses.IN_PROGRESS,
+      Statuses.DONE,
+    );
+
+    // Now create a new page
+    return await createNotionPage(
+      token,
+      config.notionDbIds.nodes,
+      {
+        Name: {
+          title: [
+            {
+              text: {
+                content: title,
+              },
+            },
+          ],
+        },
+        Target: {
+          number: targetValue,
+        },
+        "Windmill State": {
+          rich_text: [
+            {
+              text: {
+                content: targetWindmillState,
+              },
+            },
+          ],
+        },
+        Objectives: {
+          relation: relatedObjectives.map((r: string) => ({ id: r })),
+        },
+        "Node Type": {
+          select: {
+            name: Selects.KEY_RESULT,
+          },
+        },
+        Status: {
+          select: {
+            name: status,
+          },
+        },
+      },
+      emoji,
+    );
+  }
+}
+
 // JS
 function flattenList(arr: any[]): any[] {
   return arr.reduce((acc, currentItem) => {
@@ -277,6 +415,7 @@ export {
   computeFrequencies,
   createNotionPage,
   flattenList,
+  markStatus,
   getLastDayOfMonth,
   getMeditationsForMonthAndYear,
   getObservationsForMonthAndYear,
@@ -290,4 +429,5 @@ export {
   validateEnumString,
   WindmillStateContains,
   getNodeByWindmillState,
+  createMonthlyKeyResultPage,
 };
