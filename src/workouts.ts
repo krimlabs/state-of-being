@@ -189,28 +189,20 @@ async function createMonthlyWorkoutKeyResult(
   const weekdays = getWeekdaysInMonth(year, month);
   const monthName = getMonthName(month);
   const title = `Workout ${weekdays} times during ${monthName}, ${year} ⁂`;
-  const targetWindmillState = `${WindmillStateContains.AUTO_WORKOUTS}-${month}-${year}`;
   const emoji = "🐒";
 
   try {
-    await createMonthlyKeyResultPage(
+    return await createMonthlyKeyResultPage(
       config.NOTION_TOKEN,
       title,
       weekdays,
       [config.anchorNodeIds.workoutFiveTimesAWeekObj],
       WindmillStateContains.AUTO_WORKOUTS,
-      targetWindmillState,
       emoji,
       Statuses.IN_PROGRESS,
       year,
       month,
     );
-
-    return {
-      msg: "New key result created successfully",
-      title,
-      targetValue: weekdays,
-    };
   } catch (error) {
     return { msg: "Unable to create new page" };
   }

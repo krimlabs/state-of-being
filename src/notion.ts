@@ -298,8 +298,6 @@ async function createMonthlyKeyResultPage(
   relatedObjectives: string[],
   // This is the type of Key Result we are creating: Workout, Meditation or Observations
   forWindmillState: WindmillStateContains,
-  // This is the value of the state that will be set: AutoWorkout-11-2023
-  targetWindmillState: string,
   emoji: string,
   status: Statuses,
   forYear?: number,
@@ -307,8 +305,8 @@ async function createMonthlyKeyResultPage(
 ) {
   const year = forYear || getCurrentYear();
   const month = forMonth || getCurrentMonth();
-
   const searchTerm = `${forWindmillState}-${month}-${year}`;
+
   const keyResult = await getNodeByWindmillState(token, searchTerm);
 
   if (keyResult.results.length > 0) {
@@ -331,7 +329,7 @@ async function createMonthlyKeyResultPage(
     );
 
     // Now create a new page
-    return await createNotionPage(
+    await createNotionPage(
       token,
       config.notionDbIds.nodes,
       {
@@ -351,7 +349,7 @@ async function createMonthlyKeyResultPage(
           rich_text: [
             {
               text: {
-                content: targetWindmillState,
+                content: searchTerm,
               },
             },
           ],
@@ -372,6 +370,12 @@ async function createMonthlyKeyResultPage(
       },
       emoji,
     );
+
+    return {
+      msg: "New key result created successfully",
+      title,
+      targetValue,
+    };
   }
 }
 
