@@ -3,14 +3,16 @@ name: "🕛 Set workout KR current prop"
 on:
   schedule:
     - cron: "0 0 * * *"
+
   workflow_dispatch:
     inputs:
       year:
-        description: "Year for the command"
+        description: "Year"
         required: false
       month:
-        description: "Month for the command"
+        description: "Month"
         required: false
+
 jobs:
   set-workout-kr-current:
     runs-on: ubuntu-latest
@@ -31,5 +33,10 @@ jobs:
       - name: "✅ Install Dependencies"
         run: bun install
 
-      - name: "🏃‍♂️ Fetch value and set on Notion"
+      - name: "🏃‍♂️ Fetch value and set on Notion with given year and month"
+        if: "${{ github.event.inputs.year != '' && github.event.inputs.month != '' }}"
         run: bun run cli set-current-value-of-workout-key-result -y ${{ github.event.inputs.year }} -m ${{ github.event.inputs.month }}
+
+      - name: "🏃‍♂️ Fetch value and set on Notion with default year and month"
+        if: "${{ github.event.inputs.year == '' && github.event.inputs.month == '' }}"
+        run: bun run cli set-current-value-of-workout-key-result
