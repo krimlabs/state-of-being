@@ -20,6 +20,7 @@ jobs:
     env:
       NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
       GOOGLE_SHEETS_API_KEY: ${{ secrets.GOOGLE_SHEETS_API_KEY }}
+      ULTRAHUMAN_R1_TOKEN: ${{ secrets.ULTRAHUMAN_R1_TOKEN}}
 
     steps:
       - name: "📦 Checkout"
@@ -50,7 +51,7 @@ jobs:
       - name: "🗄️ Commit vault back to repo"
         uses: stefanzweifel/git-auto-commit-action@v4.15.4
         with:
-          commit_message: "🤖 Add workout data"
+          commit_message: "🤖 Save data to vault"
           commit_user_name: "0x4444"
           commit_user_email: "0x4444@users.noreply.github.com"
           commit_author: "0x4444 <0x4444@users.noreply.github.com>"
