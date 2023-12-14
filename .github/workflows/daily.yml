@@ -44,6 +44,9 @@ jobs:
       - name: "📃 Fetch workouts data and write to vault"
         run: bun run cli save-workout-stats-to-vault
 
+      - name: "🛌 Fetch sleep data and write to vault"
+        run: bun run cli save-next-sleep-stats-to-vault
+
       - name: "🗄️ Commit vault back to repo"
         uses: stefanzweifel/git-auto-commit-action@v4.15.4
         with:

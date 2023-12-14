@@ -75,7 +75,27 @@ function getWeekdaysInMonth(year: number, month: number): number {
     .length;
 }
 
+function addNDaysToDate(dateString: string, n: number): string {
+  const [day, month, year] = dateString.split("-").map(Number);
+  const currentDate = new Date(year, month - 1, day); // Creating a Date object (months are zero-based)
+
+  currentDate.setDate(currentDate.getDate() + n); // Adding 'n' days to the current date
+
+  const updatedDay = currentDate.getDate();
+  const updatedMonth = currentDate.getMonth() + 1; // Adding 1 as months are zero-based
+  const updatedYear = currentDate.getFullYear();
+
+  const formattedDate = `${updatedDay
+    .toString()
+    .padStart(2, "0")}-${updatedMonth
+    .toString()
+    .padStart(2, "0")}-${updatedYear}`;
+
+  return formattedDate;
+}
+
 export {
+  addNDaysToDate,
   getCurrentDate,
   getCurrentMonth,
   getCurrentDay,

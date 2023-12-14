@@ -1,6 +1,7 @@
 export default {
   NOTION_TOKEN: process.env.NOTION_TOKEN,
   GOOGLE_SHEETS_API_KEY: process.env.GOOGLE_SHEETS_API_KEY,
+  ULTRAHUMAN_R1_TOKEN: process.env.ULTRAHUMAN_R1_TOKEN,
   notionDbIds: {
     observations: "71681b1b2a5a46549ac4b2e7009e13d8",
     meditations: "5dbc0d1f7cab4a618295a8f0e11a89b5",
@@ -13,4 +14,7 @@ export default {
     awarnessObjective: "6492e9e915be40a3a117a01363654402",
   },
   workoutTrackerSheetId: "1_xT1rEBccwWMRKwZoxq6UDyHTYC9EygOU17TzxAsHbw",
+  ultrahumanApiBase: "https://api.ultrahuman.com/api/web_v1/ring_insights.json",
+  workoutsSavePath: "./vault/workouts.json",
+  ultrahumanSavePath: "./vault/ultrahuman",
 };

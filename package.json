@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@notionhq/client": "^2.2.14",
+    "axios": "^1.6.2",
     "commander": "^11.1.0",
     "google-spreadsheet": "^4.1.1"
   }

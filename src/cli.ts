@@ -6,7 +6,9 @@ import {
   createMonthlyWorkoutKeyResult,
   saveWorkoutStatsToVault,
 } from "@src/workouts";
+import { saveUltrahumanInsightsToVault } from "@src/sleep";
 import { getCurrentYear, getCurrentMonth } from "@src/time";
+import config from "@src/config";
 
 program
   .command("set-current-value-of-workout-key-result")
@@ -54,8 +56,21 @@ program
 
 program.command("save-workout-stats-to-vault").action(async () => {
   try {
-    const savePath = "./vault/workouts.json";
+    const savePath = config.workoutsSavePath;
     const res = await saveWorkoutStatsToVault(savePath);
+    console.log(res);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+program.command("save-next-sleep-stats-to-vault").action(async () => {
+  try {
+    const savePath = config.ultrahumanSavePath;
+    const res = await saveUltrahumanInsightsToVault(
+      config.ULTRAHUMAN_R1_TOKEN,
+      savePath,
+    );
     console.log(res);
   } catch (error) {
     console.log(error);
