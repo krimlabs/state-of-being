@@ -1,0 +1,22 @@
+{
+  "countByYearMonth": {
+    "2023": {
+      "5": 16,
+      "6": 19,
+      "7": 16,
+      "8": 17,
+      "9": 7,
+      "10": 7,
+      "11": 5,
+      "12": 6
+    }
+  },
+  "aggregates": {
+    "2023": {
+      "totalWorkouts": 93,
+      "averageWorkoutsPerMonth": 11.63,
+      "monthWithMostWorkouts": "6",
+      "monthWithLeastWorkouts": "11"
+    }
+  }
+}
