@@ -1,4 +1,4 @@
-name: "🕛 Set workout KR current prop"
+name: "☀️ Daily tasks"
 
 on:
   schedule:
@@ -14,7 +14,7 @@ on:
         required: false
 
 jobs:
-  set-workout-kr-current:
+  run-daily-tasks:
     runs-on: ubuntu-latest
 
     env:
@@ -40,3 +40,15 @@ jobs:
       - name: "🏃‍♂️ Fetch value and set on Notion with default year and month"
         if: "${{ github.event.inputs.year == '' && github.event.inputs.month == '' }}"
         run: bun run cli set-current-value-of-workout-key-result
+
+      - name: "🏃‍♂️ Fetch and save workout stats"
+        run: bun run cli save-workout-stats-to-vault
+
+      - name: "🗄️ Commit vault back to repo"
+        uses: stefanzweifel/git-auto-commit-action@v4.15.4
+        with:
+          commit_message: "🤖 Add workout data"
+          commit_user_name: "0x4444"
+          commit_user_email: "0x4444@users.noreply.github.com"
+          commit_author: "0x4444 <0x4444@users.noreply.github.com>"
+          file_pattern: "vault/*"

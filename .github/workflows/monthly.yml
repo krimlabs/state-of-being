@@ -1,4 +1,4 @@
-name: "📆 Create monthly workout KR"
+name: "📆 Monthly tasks"
 
 on:
   schedule:
@@ -14,7 +14,7 @@ on:
         required: false
 
 jobs:
-  create-monthly-workout-kr:
+  run-monthly-tasks:
     runs-on: ubuntu-latest
 
     env:

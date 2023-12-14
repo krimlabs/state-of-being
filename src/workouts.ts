@@ -48,6 +48,13 @@ async function fetchSheetHeaderValues(sheetId: string, apiKey: string) {
       return !isNaN(parsedDate);
     })
     .filter(startsWithCapitalMonth)
+    .reduce((acc: string[], current: string) => {
+      // filter dupes if any
+      if (!acc.includes(current)) {
+        acc.push(current);
+      }
+      return acc;
+    }, [])
     .map((dateString: string) => new Date(dateString));
 
   return dates;
