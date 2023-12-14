@@ -1,8 +1,10 @@
-import { expect, test } from "bun:test";
+import { expect, test, describe, it, beforeAll, afterAll } from "bun:test";
+import { unlink } from "node:fs/promises";
 import {
   fetchWorkoutSheetData,
   generateYearlyWorkoutAggregates,
   WorkoutSheetData,
+  saveWorkoutStatsToVault,
 } from "@src/workouts";
 
 test("fetchSheetData", async () => {
@@ -71,5 +73,24 @@ test("generateYearlyWorkoutAggregates", () => {
     averageWorkoutsPerMonth: 20.58,
     monthWithMostWorkouts: "7",
     monthWithLeastWorkouts: "1",
+  });
+});
+
+describe("saveStatsToVault", () => {
+  const savePath = "./vault/workouts.test.json";
+  beforeAll(async () => {
+    await Bun.write(savePath, "");
+  });
+
+  afterAll(async () => {
+    await unlink(savePath);
+  });
+
+  it("should fetchSheetData and save to specified file", async () => {
+    const res = await saveWorkoutStatsToVault(savePath);
+    const data = await fetchWorkoutSheetData();
+    const dataOnDisk = JSON.parse(await Bun.file(savePath).text());
+
+    expect(JSON.stringify(dataOnDisk)).toBe(JSON.stringify(data));
   });
 });

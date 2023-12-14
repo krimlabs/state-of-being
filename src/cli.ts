@@ -4,6 +4,7 @@ import { program } from "commander";
 import {
   setCurrentValueOfWorkoutKeyResult,
   createMonthlyWorkoutKeyResult,
+  saveWorkoutStatsToVault,
 } from "@src/workouts";
 import { getCurrentYear, getCurrentMonth } from "@src/time";
 
@@ -50,5 +51,15 @@ program
       console.error("An error occurred:", error);
     }
   });
+
+program.command("save-workout-stats-to-vault").action(async () => {
+  try {
+    const savePath = "./vault/workouts.json";
+    const res = await saveWorkoutStatsToVault(savePath);
+    console.log(res);
+  } catch (error) {
+    console.log(error);
+  }
+});
 
 program.parse(process.argv);

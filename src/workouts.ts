@@ -208,6 +208,28 @@ async function createMonthlyWorkoutKeyResult(
   }
 }
 
+async function saveWorkoutStatsToVault(savePath: string) {
+  const stats = await fetchWorkoutSheetData();
+
+  try {
+    // Convert stats to JSON format
+    const statsJSON = JSON.stringify(stats, null, 2);
+
+    // Write the stats data to the file using Bun.write
+    await Bun.write(savePath, statsJSON);
+
+    return {
+      savePath,
+      msg: "Stats saved successfully",
+    };
+  } catch (err) {
+    return {
+      error: err,
+      msg: "Error saving stats",
+    };
+  }
+}
+
 export {
   fetchWorkoutSheetData,
   generateYearlyWorkoutAggregates,
@@ -215,4 +237,5 @@ export {
   YearlyWorkoutAggregates,
   setCurrentValueOfWorkoutKeyResult,
   createMonthlyWorkoutKeyResult,
+  saveWorkoutStatsToVault,
 };
