@@ -33,10 +33,10 @@ jobs:
       - name: "✅ Install dependencies"
         run: bun install
 
-      - name: "🏃‍♂️ Create Key Result for given month"
+      - name: "🐒 Create workout key result for given month"
         if: "${{ github.event.inputs.year != '' && github.event.inputs.month != '' }}"
         run: bun run cli create-monthly-workout-key-result -y ${{ github.event.inputs.year }} -m ${{ github.event.inputs.month }}
 
-      - name: "🏃‍♂️ Create Key Result for current month"
+      - name: "🐒 Create workout key result for current month"
         if: "${{ github.event.inputs.year == '' && github.event.inputs.month == '' }}"
         run: bun run cli create-monthly-workout-key-result
