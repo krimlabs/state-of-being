@@ -6,7 +6,10 @@ import {
   createMonthlyWorkoutKeyResult,
   saveWorkoutStatsToVault,
 } from "@src/workouts";
-import { saveUltrahumanInsightsToVault } from "@src/sleep";
+import {
+  saveSleepStatsToVault,
+  saveUltrahumanInsightsToVault,
+} from "@src/sleep";
 import { getCurrentYear, getCurrentMonth } from "@src/time";
 import config from "@src/config";
 
@@ -56,7 +59,7 @@ program
 
 program.command("save-workout-stats-to-vault").action(async () => {
   try {
-    const savePath = config.workoutsSavePath;
+    const savePath = config.workoutStatsSavePath;
     const res = await saveWorkoutStatsToVault(savePath);
     console.log(res);
   } catch (error) {
@@ -66,10 +69,22 @@ program.command("save-workout-stats-to-vault").action(async () => {
 
 program.command("save-next-sleep-stats-to-vault").action(async () => {
   try {
-    const savePath = config.ultrahumanSavePath;
+    const folderPath = config.ultrahumanFolderPath;
     const res = await saveUltrahumanInsightsToVault(
       config.ULTRAHUMAN_R1_TOKEN,
-      savePath,
+      folderPath,
+    );
+    console.log(res);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+program.command("save-sleep-aggregate-stats-to-vault").action(async () => {
+  try {
+    const res = await saveSleepStatsToVault(
+      config.ultrahumanFolderPath,
+      config.ultrahumanSleepAggregatesSavePath,
     );
     console.log(res);
   } catch (error) {

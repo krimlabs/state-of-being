@@ -15,6 +15,7 @@ export default {
   },
   workoutTrackerSheetId: "1_xT1rEBccwWMRKwZoxq6UDyHTYC9EygOU17TzxAsHbw",
   ultrahumanApiBase: "https://api.ultrahuman.com/api/web_v1/ring_insights.json",
-  workoutsSavePath: "./vault/workouts.json",
-  ultrahumanSavePath: "./vault/ultrahuman",
+  workoutStatsSavePath: "./vault/workouts.json",
+  ultrahumanFolderPath: "./vault/ultrahuman",
+  ultrahumanSleepAggregatesSavePath: "./vault/ultrahuman/sleep.json",
 };

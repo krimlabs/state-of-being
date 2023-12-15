@@ -89,7 +89,7 @@ describe("saveStatsToVault", () => {
   it("should fetchSheetData and save to specified file", async () => {
     const res = await saveWorkoutStatsToVault(savePath);
     const data = await fetchWorkoutSheetData();
-    const dataOnDisk = JSON.parse(await Bun.file(savePath).text());
+    const dataOnDisk = await Bun.file(savePath).json();
 
     expect(JSON.stringify(dataOnDisk)).toBe(JSON.stringify(data));
   });

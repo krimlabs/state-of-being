@@ -1,0 +1,64 @@
+{
+  "2023": {
+    "3": {
+      "sleepIndex": 83,
+      "recoveryIndex": 80.5,
+      "movementIndex": 73.5,
+      "sleepTrackerMissingInfo": false
+    },
+    "4": {
+      "sleepIndex": 82.5,
+      "recoveryIndex": 84.75,
+      "movementIndex": 63.75,
+      "sleepTrackerMissingInfo": false
+    },
+    "5": {
+      "sleepIndex": 78.6,
+      "recoveryIndex": 80.4,
+      "movementIndex": 67,
+      "sleepTrackerMissingInfo": false
+    },
+    "6": {
+      "sleepIndex": 68.25,
+      "recoveryIndex": 76,
+      "movementIndex": 73,
+      "sleepTrackerMissingInfo": false
+    },
+    "7": {
+      "sleepIndex": 69.2,
+      "recoveryIndex": 73.8,
+      "movementIndex": 70.2,
+      "sleepTrackerMissingInfo": false
+    },
+    "8": {
+      "sleepIndex": 70.25,
+      "recoveryIndex": 74.5,
+      "movementIndex": 64.75,
+      "sleepTrackerMissingInfo": false
+    },
+    "9": {
+      "sleepIndex": 64.25,
+      "recoveryIndex": 58.5,
+      "movementIndex": 60.5,
+      "sleepTrackerMissingInfo": true
+    },
+    "10": {
+      "sleepIndex": 13.6,
+      "recoveryIndex": 15.2,
+      "movementIndex": 11.8,
+      "sleepTrackerMissingInfo": true
+    },
+    "11": {
+      "sleepIndex": 21,
+      "recoveryIndex": 19.75,
+      "movementIndex": 14.75,
+      "sleepTrackerMissingInfo": true
+    },
+    "12": {
+      "sleepIndex": 75,
+      "recoveryIndex": 77,
+      "movementIndex": 58,
+      "sleepTrackerMissingInfo": false
+    }
+  }
+}
