@@ -48,6 +48,9 @@ jobs:
       - name: "🛌 Fetch sleep data and write to vault"
         run: bun run cli save-next-sleep-stats-to-vault
 
+      - name: "💤 Aggregate weekly sleep data and write to vault"
+        run: bun run cli save-sleep-aggregate-stats-to-vault
+
       - name: "🗄️ Commit vault back to repo"
         uses: stefanzweifel/git-auto-commit-action@v4.15.4
         with:
