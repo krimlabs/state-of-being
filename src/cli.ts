@@ -12,6 +12,7 @@ import {
 } from "@src/sleep";
 import { getCurrentYear, getCurrentMonth } from "@src/time";
 import config from "@src/config";
+import { saveMeditationAggregatesToVault } from "./meditations";
 
 program
   .command("set-current-value-of-workout-key-result")
@@ -91,5 +92,33 @@ program.command("save-sleep-aggregate-stats-to-vault").action(async () => {
     console.log(error);
   }
 });
+
+// Aggregates are computed for month, but should be written daily so it stays updated
+program
+  .command("save-monthly-meditation-aggregates-to-vault")
+  .option(
+    "-y, --year <year>",
+    "Year for which to compute aggregates",
+    getCurrentYear(),
+  )
+  .option(
+    "-m, --month <month>",
+    "Month for which to compute aggregates",
+    getCurrentMonth(),
+  )
+  .action(async (options: { year?: number; month?: number }) => {
+    try {
+      const { year, month } = options;
+      const result = await saveMeditationAggregatesToVault(
+        config.meditationAggregatesSavePath,
+        config.NOTION_TOKEN,
+        month,
+        year,
+      );
+      console.log(result);
+    } catch (error) {
+      console.log(error);
+    }
+  });
 
 program.parse(process.argv);

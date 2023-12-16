@@ -51,6 +51,14 @@ jobs:
       - name: "💤 Aggregate weekly sleep data and write to vault"
         run: bun run cli save-sleep-aggregate-stats-to-vault
 
+      - name: "🕊️ Aggregate monthly meditation data and write to vault for given year and month"
+        if: "${{ github.event.inputs.year != '' && github.event.inputs.month != '' }}"
+        run: bun run cli save-monthly-meditation-aggregates-to-vault -y ${{ github.event.inputs.year }} -m ${{ github.event.inputs.month }}
+
+      - name: "🕊️ Aggregate monthly meditation data and write to vault for current year and month"
+        if: "${{ github.event.inputs.year == '' && github.event.inputs.month == '' }}"
+        run: bun run cli save-monthly-meditation-aggregates-to-vault
+
       - name: "🗄️ Commit vault back to repo"
         uses: stefanzweifel/git-auto-commit-action@v4.15.4
         with:

@@ -220,7 +220,7 @@ async function saveWorkoutStatsToVault(savePath: string) {
 
   try {
     // Convert stats to JSON format
-    const statsJSON = JSON.stringify(stats, null, 2);
+    const statsJSON = JSON.stringify(stats);
 
     // Write the stats data to the file using Bun.write
     await Bun.write(savePath, statsJSON);

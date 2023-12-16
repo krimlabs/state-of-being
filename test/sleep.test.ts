@@ -10,6 +10,7 @@ import { rm, unlink } from "node:fs/promises";
 import { expect, describe, it, beforeAll, afterAll } from "bun:test";
 
 import config from "@src/config";
+
 const savePath = "./vault/ultrahuman.test";
 
 beforeAll(async () => {

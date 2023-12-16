@@ -18,4 +18,5 @@ export default {
   workoutStatsSavePath: "./vault/workouts.json",
   ultrahumanFolderPath: "./vault/ultrahuman",
   ultrahumanSleepAggregatesSavePath: "./vault/ultrahuman/sleep.json",
+  meditationAggregatesSavePath: "./vault/meditations.json",
 };
