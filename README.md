@@ -1,12 +1,14 @@
 ![state-of-being repo cover](https://github.com/krimlabs/state-of-being/assets/1925158/1fc589a5-e822-4e59-883b-ed3b3d5aff96)
 
 # Introduction
-`state of being` is a collection of scripts and tasks that collects and quantifies my current state and goals.
 
-At an atomic level, it tracks my sleep, awareness, workouts and meditation efficiency. At an abstract level, it ties my daily tasks ([कर्म](https://www.rekhtadictionary.com/meaning-of-karm#:~:text=act%2C%20deed%2C%20religious%20act%2C%20destiny)) to my vision for life. 
-With this project, I intend to track and improve myself like I would track a product. 
+**State of Being** is a collection of scripts and tasks designed to gather and quantify my current state and goals. 📊
 
-The principles of this system are a product of my teacher and mentor [Dr. Amit Jain](https://www.linkedin.com/in/dramitjain/?originalSubdomain=in). The data collection and interfaces are inspired by the works of [@AnandChoudhary](https://github.com/AnandChowdhary/life) and [Bryan Johnson](https://protocol.bryanjohnson.com/). 
+At an atomic level, it monitors aspects like my sleep patterns, awareness, workouts, and meditation efficiency. On a more abstract level, it links my daily tasks [कर्म](https://www.rekhtadictionary.com/meaning-of-karm#:~:text=act%2C%20deed%2C%20religious%20act%2C%20destiny) to my life's vision. 
+Through this project, my aim is to track and enhance personal growth in a manner akin to tracking the development of a product. 🌱
+
+The foundational principles of this system stem from the teachings of my teacher and mentor, [Dr. Amit Jain](https://www.linkedin.com/in/dramitjain/?originalSubdomain=in). The data collection methods and interfaces draw inspiration from the works of [@AnandChoudhary](https://github.com/AnandChowdhary/life)
+and [Bryan Johnson](https://protocol.bryanjohnson.com/). 🙌
 
 ## API
 I use jsDeliver's free code CDN to serve the files in this repo as an API.
