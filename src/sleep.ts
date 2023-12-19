@@ -1,14 +1,28 @@
 import axios from "axios";
 import path from "path";
 import config from "@src/config";
-import { addNDaysToDate } from "@src/time";
+import { addNDaysToDate, getCurrentYear, getCurrentMonth } from "@src/time";
 
 type Insight = {
   title?: string;
   description?: string;
 };
+type IndexContributorTitle =
+  | "Active Hours"
+  | "HR Drop"
+  | "HRV Form"
+  | "Movement Index"
+  | "Resting Heart Rate"
+  | "Restfulness"
+  | "Sleep Quotient"
+  | "Steps"
+  | "Temperature Deviation"
+  | "Timing"
+  | "Total Sleep"
+  | "Workout Frequency";
+
 type IndexContributor = {
-  title: string;
+  title: IndexContributorTitle;
   icon: string;
   description: string;
   weekly_average: {
@@ -39,38 +53,42 @@ type WeeklyAverage = {
 type IndexTypes = "sleep_index" | "recovery_index" | "movement_index";
 
 type UltrahumanInsightResponse = {
-  user_name: string;
-  average_scores: Record<IndexTypes, IndexData>;
-  selected_week: string;
-  sleep_index: {
-    title: string;
-    description: string;
-    weekly_average: WeeklyAverage;
-    insights: Insight[];
-    best_contributors: IndexContributor[];
-    worst_contributors: IndexContributor[];
+  data: {
+    user_name: string;
+    average_scores: Record<IndexTypes, IndexData>;
+    selected_week: string;
+    sleep_index: {
+      title: string;
+      description: string;
+      weekly_average: WeeklyAverage;
+      insights: Insight[];
+      best_contributors: IndexContributor[];
+      worst_contributors: IndexContributor[];
+    };
+    recovery_index: {
+      title: string;
+      description: string;
+      weekly_average: WeeklyAverage;
+      insights: Insight[];
+      best_contributors: IndexContributor[];
+      worst_contributors: IndexContributor[];
+    };
+    movement_index: {
+      title: string;
+      description: string;
+      weekly_average: WeeklyAverage;
+      insights: Insight[];
+      best_contributors: IndexContributor[];
+      worst_contributors: IndexContributor[];
+    };
+    weeks: {
+      week_0: WeekData;
+      week_minus_1: WeekData;
+      week_minus_2: WeekData;
+    };
   };
-  recovery_index: {
-    title: string;
-    description: string;
-    weekly_average: WeeklyAverage;
-    insights: Insight[];
-    best_contributors: IndexContributor[];
-    worst_contributors: IndexContributor[];
-  };
-  movement_index: {
-    title: string;
-    description: string;
-    weekly_average: WeeklyAverage;
-    insights: Insight[];
-    best_contributors: IndexContributor[];
-    worst_contributors: IndexContributor[];
-  };
-  weeks: {
-    week_0: WeekData;
-    week_minus_1: WeekData;
-    week_minus_2: WeekData;
-  };
+  error: string;
+  status: string;
 };
 
 async function fetchInsights(
@@ -87,9 +105,9 @@ async function fetchInsights(
         "Accept-Encoding": "gzip, deflate",
       },
     });
-    return response.data.data;
+    return response.data;
   } catch (error) {
-    return error;
+    throw error;
   }
 }
 
@@ -131,7 +149,8 @@ async function saveUltrahumanInsightsToVault(token: string, savePath: string) {
   const lastSavedWeekStart = await fetchLastSavedInIndex(savePath);
   const nextWeekStart = addNDaysToDate(lastSavedWeekStart, 7);
 
-  const insights = await fetchInsights(token, nextWeekStart);
+  const insightsRaw = await fetchInsights(token, nextWeekStart);
+  const insights = insightsRaw.data;
   const insightWeekStart = insights.weeks.week_0.start;
 
   if (lastSavedWeekStart === insightWeekStart) {
@@ -144,21 +163,15 @@ async function saveUltrahumanInsightsToVault(token: string, savePath: string) {
     await updateLastSavedIndex(savePath, insightWeekStart);
     await Bun.write(
       `${savePath}/${insightWeekStart}.json`,
-      JSON.stringify(insights),
+      JSON.stringify(insightsRaw),
     );
     return { msg: "Insights file written successfully", insightWeekStart };
   }
 }
 
-type UltrahumanDataOnDisk = {
-  data: UltrahumanInsightResponse;
-  status: string;
-  error?: string;
-};
-
 type SleepDataOnDisk = {
   fileName: string;
-  ultrahumanDataOnDisk: UltrahumanDataOnDisk;
+  ultrahumanDataOnDisk: UltrahumanInsightResponse;
 };
 
 async function readAllSleepDataFromDisk(
@@ -169,11 +182,12 @@ async function readAllSleepDataFromDisk(
 
   const combined = await Promise.all(
     indexDates.map(async (date: string) => {
-      const jsonFilePath = path.join(folderPath, `${date}.json`);
-      const ultrahumanDataOnDisk: UltrahumanDataOnDisk =
+      const fileName = `${date}.json`;
+      const jsonFilePath = path.join(folderPath, fileName);
+      const ultrahumanDataOnDisk: UltrahumanInsightResponse =
         await Bun.file(jsonFilePath).json();
 
-      return { fileName: date, ultrahumanDataOnDisk };
+      return { fileName, ultrahumanDataOnDisk };
     }),
   );
 
@@ -185,7 +199,11 @@ function groupAllDataByYearAndMonth(
 ): Record<string, Record<string, SleepDataOnDisk[]>> {
   return dataList.reduce(
     (groupedData, dataObj) => {
-      const [_day, month, year] = dataObj.fileName.split("-").map(Number);
+      // convert a file name like: 12-11-2023.json to [12, 11, 2023] and cut the .json part
+      const [_day, month, year] = dataObj.fileName
+        .slice(0, dataObj.fileName.indexOf("."))
+        .split("-")
+        .map(Number);
 
       return {
         ...groupedData,
@@ -199,30 +217,81 @@ function groupAllDataByYearAndMonth(
   );
 }
 
+function extractContributors(
+  dataList: UltrahumanInsightResponse[],
+): Record<IndexContributorTitle, IndexContributor[]> {
+  const flattenedContributors = dataList
+    .reduce((acc: IndexContributor[][], current: UltrahumanInsightResponse) => {
+      const { sleep_index, movement_index, recovery_index } = current.data;
+
+      return [
+        ...acc,
+        [
+          ...(sleep_index?.best_contributors || []),
+          ...(sleep_index?.worst_contributors || []),
+          ...(movement_index?.best_contributors || []),
+          ...(movement_index?.worst_contributors || []),
+          ...(recovery_index?.best_contributors || []),
+          ...(recovery_index?.worst_contributors || []),
+        ],
+      ];
+    }, [])
+    .flat();
+
+  const groupedByTitle = flattenedContributors.reduce(
+    (acc: Record<IndexContributorTitle, IndexContributor[]>, curr) => ({
+      ...acc,
+      [curr.title]: [...(acc[curr.title] || []), curr],
+    }),
+    {},
+  );
+
+  return groupedByTitle;
+}
+
 type MonthlySleepStats = {
   sleepIndex: number;
   recoveryIndex: number;
   movementIndex: number;
   sleepTrackerMissingInfo: boolean;
+  contributorAverages: Record<IndexContributorTitle, number>;
 };
+
 function calculateMonthlySleepStats(
   dataList: UltrahumanInsightResponse[],
 ): MonthlySleepStats {
   const totalSleepIndex = dataList.reduce((acc, current) => {
-    return acc + current.average_scores.sleep_index.value;
+    return acc + current.data.average_scores.sleep_index.value;
   }, 0);
 
   const totalMovementIndex = dataList.reduce((acc, current) => {
-    return acc + current.average_scores.movement_index.value;
+    return acc + current.data.average_scores.movement_index.value;
   }, 0);
 
   const totalRecoveryIndex = dataList.reduce((acc, current) => {
-    return acc + current.average_scores.recovery_index.value;
+    return acc + current.data.average_scores.recovery_index.value;
   }, 0);
 
   const sleepIndex = totalSleepIndex / dataList.length;
   const recoveryIndex = totalRecoveryIndex / dataList.length;
   const movementIndex = totalMovementIndex / dataList.length;
+
+  const contributors = extractContributors(dataList);
+
+  const contributorAverages = Object.keys(contributors).reduce(
+    (accOut, k: string) => {
+      const monthlyData = contributors[k];
+
+      const total = monthlyData.reduce(
+        (acc: number, current: IndexContributor) => {
+          return acc + current.weekly_average.week_0;
+        },
+        0,
+      );
+      return { ...accOut, [k]: total / monthlyData.length };
+    },
+    {},
+  );
 
   return {
     sleepIndex,
@@ -230,7 +299,8 @@ function calculateMonthlySleepStats(
     movementIndex,
     // missing info means I didn't wear the ring for some nights
     sleepTrackerMissingInfo:
-      dataList.filter((item) => item.sleep_index === null).length > 0,
+      dataList.filter((item) => item.data.sleep_index === null).length > 0,
+    contributorAverages,
   };
 }
 
@@ -240,19 +310,19 @@ async function aggregateWeeklyData(
 ): Promise<Record<string, Record<string, MonthlySleepStats>>> {
   const sleepData = await readAllSleepDataFromDisk(folderPath);
   const grouped = groupAllDataByYearAndMonth(sleepData);
-  return Object.entries(grouped).reduce(
+  const aggregated = Object.entries(grouped).reduce(
     (
       overallAverages,
-      [year, monthData]: [string, Record<string, SleepDataOnDisk[]>],
+      [year, monthDataRaw]: [string, Record<string, SleepDataOnDisk[]>],
     ) => {
       return {
         ...overallAverages,
-        [year]: Object.entries(monthData).reduce(
-          (acc, [month, monthData]: [string, SleepDataOnDisk[]]) => {
+        [year]: Object.entries(monthDataRaw).reduce(
+          (acc, [month, monthGroupedList]: [string, SleepDataOnDisk[]]) => {
             return {
               ...acc,
               [month]: calculateMonthlySleepStats(
-                monthData.map((m) => m.ultrahumanDataOnDisk.data),
+                monthGroupedList.map((m) => m.ultrahumanDataOnDisk),
               ),
             };
           },
@@ -262,6 +332,13 @@ async function aggregateWeeklyData(
     },
     {},
   );
+
+  // send the latest stats in a seperate key so website can render mindlessly
+  const currentYear = getCurrentYear();
+  const currentMonth = getCurrentMonth();
+  const latest = aggregated[currentYear][currentMonth];
+
+  return { ...aggregated, latest };
 }
 
 async function saveSleepStatsToVault(folderPath: string, savePath: string) {
@@ -269,7 +346,7 @@ async function saveSleepStatsToVault(folderPath: string, savePath: string) {
 
   try {
     // Convert stats to JSON format
-    const statsJSON = JSON.stringify(stats, null, 2);
+    const statsJSON = JSON.stringify({ ...stats });
 
     // Write the stats data to the file using Bun.write
     await Bun.write(savePath, statsJSON);
@@ -285,11 +362,17 @@ async function saveSleepStatsToVault(folderPath: string, savePath: string) {
     };
   }
 }
+
 export {
   aggregateWeeklyData,
   saveSleepStatsToVault,
   fetchInsights,
   UltrahumanInsightResponse,
+  IndexContributorTitle,
   fetchLastSavedInIndex,
   saveUltrahumanInsightsToVault,
+  extractContributors,
+  groupAllDataByYearAndMonth,
+  readAllSleepDataFromDisk,
+  IndexContributor,
 };

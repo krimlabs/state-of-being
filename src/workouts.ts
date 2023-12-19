@@ -63,8 +63,8 @@ async function fetchSheetHeaderValues(sheetId: string, apiKey: string) {
 type YearlyWorkoutAggregates = {
   totalWorkouts: number;
   averageWorkoutsPerMonth: number;
-  monthWithMostWorkouts: number;
-  monthWithLeastWorkouts: number;
+  monthWithMostWorkouts: string;
+  monthWithLeastWorkouts: string;
 };
 
 function generateYearlyWorkoutAggregates(
@@ -108,6 +108,9 @@ function generateYearlyWorkoutAggregates(
 type WorkoutSheetData = {
   countByYearMonth: Record<string, Record<string, number>>;
   aggregates: YearlyWorkoutAggregates;
+  currentYear: number;
+  currentMonth: number;
+  latest: Record<string, number>;
 };
 
 async function fetchWorkoutSheetData(): Promise<WorkoutSheetData> {
@@ -115,6 +118,9 @@ async function fetchWorkoutSheetData(): Promise<WorkoutSheetData> {
     config.workoutTrackerSheetId,
     config.GOOGLE_SHEETS_API_KEY,
   );
+
+  const currentYear = getCurrentYear();
+  const currentMonth = getCurrentMonth();
 
   const countByYearMonth = dates.reduce<Record<number, Record<number, number>>>(
     (acc, date) => {
@@ -142,6 +148,9 @@ async function fetchWorkoutSheetData(): Promise<WorkoutSheetData> {
   }, {});
 
   return {
+    latest: countByYearMonth[currentYear][currentMonth],
+    currentYear,
+    currentMonth,
     countByYearMonth,
     aggregates,
   };

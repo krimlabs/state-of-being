@@ -4,7 +4,12 @@ import {
   fetchLastSavedInIndex,
   saveUltrahumanInsightsToVault,
   aggregateWeeklyData,
+  readAllSleepDataFromDisk,
+  extractContributors,
+  groupAllDataByYearAndMonth,
   saveSleepStatsToVault,
+  IndexContributor,
+  IndexContributorTitle,
 } from "@src/sleep";
 import { rm, unlink } from "node:fs/promises";
 import { expect, describe, it, beforeAll, afterAll } from "bun:test";
@@ -31,12 +36,18 @@ describe("fetchInsights", () => {
     res = await fetchInsights(config.ULTRAHUMAN_R1_TOKEN, "13-03-2023");
   });
 
-  it("should contain user_name property", () => {
-    expect(res).toHaveProperty("user_name", "Shivek Khurana");
+  it("should contain top level data, error and status", () => {
+    expect(res).toHaveProperty("data");
+    expect(res).toHaveProperty("error");
+    expect(res).toHaveProperty("status");
   });
 
-  it("should contain week info", async () => {
-    expect(res.weeks).toEqual({
+  it("should contain user_name property in res.data", () => {
+    expect(res.data).toHaveProperty("user_name", "Shivek Khurana");
+  });
+
+  it("should contain week info in res.data", async () => {
+    expect(res.data.weeks).toEqual({
       week_0: {
         start: "13-03-2023",
         end: "19-03-2023",
@@ -52,10 +63,10 @@ describe("fetchInsights", () => {
     });
   });
 
-  it("should have average_scores property", () => {
-    expect(res).toHaveProperty("average_scores");
+  it("should have average_scores property in res.data", () => {
+    expect(res.data).toHaveProperty("average_scores");
 
-    const { average_scores } = res;
+    const { average_scores } = res.data;
     expect(average_scores).toMatchObject({
       sleep_index: expect.objectContaining({
         value: expect.any(Number),
@@ -72,12 +83,15 @@ describe("fetchInsights", () => {
     });
   });
 
-  it("should have selected_week property", () => {
-    expect(res).toHaveProperty("selected_week", "Mar 13 2023 - Mar 19 2023");
+  it("should have selected_week property in res.data", () => {
+    expect(res.data).toHaveProperty(
+      "selected_week",
+      "Mar 13 2023 - Mar 19 2023",
+    );
   });
 
-  it("should have expected keys", () => {
-    expect(Object.keys(res)).toEqual([
+  it("should have expected keys in data k,v pair", () => {
+    expect(Object.keys(res.data)).toEqual([
       "user_name",
       "average_scores",
       "selected_week",
@@ -120,7 +134,14 @@ describe("saveUltrahumanInsightsToVault", () => {
     const indexContent = JSON.parse(await indexFile.text());
     expect(indexContent).toEqual(expectedIndexContent);
 
-    expect(await Bun.file(`${savePath}/03-04-2023.json`).exists()).toBe(true);
+    const savedFile = Bun.file(`${savePath}/03-04-2023.json`);
+
+    expect(await savedFile.exists()).toBe(true);
+
+    const savedFileData = await savedFile.json();
+    expect(savedFileData).toHaveProperty("data");
+    expect(savedFileData).toHaveProperty("error");
+    expect(savedFileData).toHaveProperty("status");
   });
 
   it("should fetch and save the next set insights to vault when called again", async () => {
@@ -141,31 +162,79 @@ describe("saveUltrahumanInsightsToVault", () => {
     const indexContent = JSON.parse(await indexFile.text());
     expect(indexContent).toEqual(expectedIndexContent);
 
-    expect(await Bun.file(`${savePath}/10-04-2023.json`).exists()).toBe(true);
+    const savedFile = Bun.file(`${savePath}/10-04-2023.json`);
+
+    expect(await savedFile.exists()).toBe(true);
+
+    const savedFileData = await savedFile.json();
+    expect(savedFileData).toHaveProperty("data");
+    expect(savedFileData).toHaveProperty("error");
+    expect(savedFileData).toHaveProperty("status");
+  });
+});
+
+describe("extractContributors", async () => {
+  const sleepData = await readAllSleepDataFromDisk("./vault/ultrahuman");
+  const grouped = groupAllDataByYearAndMonth(sleepData);
+
+  const november2023DataList = grouped["2023"]["12"].map(
+    (i) => i.ultrahumanDataOnDisk,
+  );
+
+  const extractedContributors = extractContributors(november2023DataList);
+
+  it("should have extracted keys of type IndexContibutorTitle", () => {
+    Object.keys(extractedContributors).map((k) => {
+      expect([
+        "Timing",
+        "HR Drop",
+        "Steps",
+        "Active Hours",
+        "HRV Form",
+        "Temperature Deviation",
+        "Restfulness",
+        "Total Sleep",
+        "Workout Frequency",
+        "Sleep Quotient",
+        "Movement Index",
+        "Resting Heart Rate",
+      ]).toContain(k as IndexContributorTitle);
+    });
+  });
+
+  it("should have each contibutor key set to a list of IndexContibutor[]", () => {
+    Object.keys(extractedContributors).map((k: string) => {
+      const val: IndexContributor[] = extractedContributors[k];
+      expect(Array.isArray(val)).toBe(true);
+
+      val.map((i: IndexContributor) => {
+        expect(i).toHaveProperty("title");
+        expect(i).toHaveProperty("weekly_average");
+      });
+    });
   });
 });
 
 describe("aggregateWeeklyData", () => {
   it("should give aggerates of weekly data by month", async () => {
     const aggregated = await aggregateWeeklyData("./vault/ultrahuman");
-    const expectedResultStructure = new Map([
-      [
-        expect.stringMatching(/\d{4}/), // Matches any string in the format of a year (four digits)
-        new Map([
-          [
-            expect.stringMatching(/\d{1,2}/), // Matches any string in the format of a month (one or two digits)
-            {
-              sleepIndex: expect.any(Number),
-              recoveryIndex: expect.any(Number),
-              movementIndex: expect.any(Number),
-              sleepTrackerMissingInfo: expect.any(Boolean),
-            },
-          ],
-        ]),
-      ],
-    ]);
 
-    expect(aggregated).toMatchObject(expectedResultStructure);
+    expect(aggregated).toHaveProperty("latest");
+    expect(aggregated).toHaveProperty("2023.10");
+    expect(aggregated).toHaveProperty("2023.11");
+    expect(aggregated).toHaveProperty("2023.12");
+
+    const december2023Res = aggregated["2023"]["12"];
+
+    expect(december2023Res).toHaveProperty("sleepIndex");
+    expect(december2023Res).toHaveProperty("recoveryIndex");
+    expect(december2023Res).toHaveProperty("movementIndex");
+    expect(december2023Res).toHaveProperty("sleepTrackerMissingInfo");
+    expect(december2023Res).toHaveProperty("contributorAverages");
+
+    const contri = december2023Res["contributorAverages"];
+    expect(contri).toHaveProperty("HR Drop");
+    expect(contri).toHaveProperty("Timing");
   });
 });
 

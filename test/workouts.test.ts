@@ -12,6 +12,9 @@ test("fetchSheetData", async () => {
   const requiredKeys: Array<keyof WorkoutSheetData> = [
     "countByYearMonth",
     "aggregates",
+    "currentYear",
+    "currentMonth",
+    "latest",
   ];
 
   // Check if all keys are present

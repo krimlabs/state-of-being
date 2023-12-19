@@ -32,7 +32,7 @@ describe("fetchDataAndComputeAggregates", async () => {
         observationsMissedDayCount: expect.any(Number),
         satButCouldNotMeditateCount: expect.any(Number),
         waterBoiledMeditationsCount: expect.any(Number),
-        mediationEfficiency: expect.any(String),
+        meditationEfficiency: expect.any(String),
       }),
     );
   });
@@ -55,6 +55,7 @@ describe("saveAggregatesToVault", () => {
 
     const dataOnDisk = await Bun.file(savePath).json();
     expect(dataOnDisk).toHaveProperty("2023.11");
+    expect(dataOnDisk).toHaveProperty("latestForDashboard");
   });
 
   it("should add to existing file if it already exists", async () => {
@@ -67,5 +68,6 @@ describe("saveAggregatesToVault", () => {
     const dataOnDisk = await Bun.file(savePath).json();
     expect(dataOnDisk).toHaveProperty("2023.11");
     expect(dataOnDisk).toHaveProperty("2023.10");
+    expect(dataOnDisk).toHaveProperty("latestForDashboard");
   });
 });

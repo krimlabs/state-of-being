@@ -197,7 +197,7 @@ type MeditationAggregate = {
     observationsMissedDayCount: number;
     satButCouldNotMeditateCount: number;
     waterBoiledMeditationsCount: number;
-    mediationEfficiency: string;
+    meditationEfficiency: string;
   };
   egosObservedFrequencyDistribution: Record<string, number>;
   egosInMeditationFrequencyDistribution: Record<string, number>;
@@ -210,8 +210,10 @@ async function fetchDataAndComputeAggregates(
   forMonth?: number,
   forYear?: number,
 ): Promise<MeditationAggregate> {
-  const month = forMonth || getCurrentMonth();
-  const year = forYear || getCurrentYear();
+  const currentMonth = getCurrentMonth();
+  const currentYear = getCurrentYear();
+  const month = forMonth || currentMonth;
+  const year = forYear || currentYear;
   const totalDaysInThisMonth = hasMonthPassed(year, month)
     ? getLastDayOfMonth(year, month)
     : getCurrentDay();
@@ -314,7 +316,7 @@ async function fetchDataAndComputeAggregates(
     observationsMissedDayCount: observationsMissingDays.count,
     satButCouldNotMeditateCount,
     waterBoiledMeditationsCount,
-    mediationEfficiency: (
+    meditationEfficiency: (
       (waterBoiledMeditationsCount * 100) /
       meditations.length
     ).toFixed(2),
@@ -371,6 +373,10 @@ async function saveMeditationAggregatesToVault(
     forYear,
   );
 
+  const currentMonth = getCurrentMonth();
+  const currentYear = getCurrentYear();
+  const currentDay = getCurrentDay();
+
   try {
     const aggregatesFile = await Bun.file(savePath);
 
@@ -379,16 +385,25 @@ async function saveMeditationAggregatesToVault(
       : {};
 
     // Convert stats to JSON format
-    const updatedAggregatesJSON = JSON.stringify({
+    const updatedAggregates = {
       ...existingAggregates,
       [aggregates.year]: {
         ...(existingAggregates[aggregates.year] || {}),
         [aggregates.month]: aggregates,
       },
-    });
+    };
+
+    // compute dashboard info here so UI does not need to mangle with time
+    const latestForDashboard = {
+      ...updatedAggregates[currentYear][currentMonth],
+      ...{ currentDay, currentYear, currentMonth },
+    };
 
     // Write the stats data to the file using Bun.write
-    await Bun.write(savePath, updatedAggregatesJSON);
+    await Bun.write(
+      savePath,
+      JSON.stringify({ ...updatedAggregates, latestForDashboard }),
+    );
 
     return {
       savePath,
