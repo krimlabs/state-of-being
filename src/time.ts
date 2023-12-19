@@ -94,6 +94,53 @@ function addNDaysToDate(dateString: string, n: number): string {
   return formattedDate;
 }
 
+function getWeekdaysPassed(year: number, month: number): number {
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1; // Months are zero-indexed
+
+  // Check if the provided year and month have passed or not
+  if (year < currentYear || (year === currentYear && month < currentMonth)) {
+    const startDate = new Date(year, month - 1, 1); // Month is zero-indexed
+    const endDate = new Date(year, month, 0); // Get the last day of the provided month
+
+    const daysArray = Array.from(
+      { length: endDate.getDate() - startDate.getDate() + 1 },
+      (_, i) =>
+        new Date(
+          startDate.getFullYear(),
+          startDate.getMonth(),
+          startDate.getDate() + i,
+        ),
+    );
+
+    const weekdays = daysArray.filter(
+      (date) => date.getDay() !== 0 && date.getDay() !== 6,
+    );
+    return weekdays.length;
+  } else if (year === currentYear && month === currentMonth) {
+    const startDate = new Date(year, month - 1, 1); // Month is zero-indexed
+    const endDate = now;
+
+    const daysArray = Array.from(
+      { length: endDate.getDate() - startDate.getDate() + 1 },
+      (_, i) =>
+        new Date(
+          startDate.getFullYear(),
+          startDate.getMonth(),
+          startDate.getDate() + i,
+        ),
+    );
+
+    const weekdays = daysArray.filter(
+      (date) => date.getDay() !== 0 && date.getDay() !== 6,
+    );
+    return weekdays.length;
+  } else {
+    return 0; // Month has not passed yet
+  }
+}
+
 export {
   addNDaysToDate,
   getCurrentDate,
@@ -104,4 +151,5 @@ export {
   getMonthName,
   hasMonthPassed,
   getLastDayOfMonth,
+  getWeekdaysPassed,
 };

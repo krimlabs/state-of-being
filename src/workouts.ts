@@ -8,6 +8,7 @@ import {
   getCurrentYear,
   getWeekdaysInMonth,
   getMonthName,
+  getWeekdaysPassed,
 } from "@src/time";
 import {
   getNodeByWindmillState,
@@ -111,6 +112,7 @@ type WorkoutSheetData = {
   currentYear: number;
   currentMonth: number;
   weekdays: number;
+  weekdaysPassed: number;
   latest: Record<string, number>;
 };
 
@@ -123,6 +125,7 @@ async function fetchWorkoutSheetData(): Promise<WorkoutSheetData> {
   const currentYear = getCurrentYear();
   const currentMonth = getCurrentMonth();
   const weekdays = getWeekdaysInMonth(currentYear, currentMonth);
+  const weekdaysPassed = getWeekdaysPassed(currentYear, currentMonth);
 
   const countByYearMonth = dates.reduce<Record<number, Record<number, number>>>(
     (acc, date) => {
@@ -152,6 +155,7 @@ async function fetchWorkoutSheetData(): Promise<WorkoutSheetData> {
   return {
     latest: countByYearMonth[currentYear][currentMonth],
     weekdays,
+    weekdaysPassed,
     currentYear,
     currentMonth,
     countByYearMonth,

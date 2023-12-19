@@ -15,6 +15,8 @@ test("fetchSheetData", async () => {
     "currentYear",
     "currentMonth",
     "latest",
+    "weekdays",
+    "weekdaysPassed",
   ];
 
   // Check if all keys are present
