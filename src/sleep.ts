@@ -333,20 +333,21 @@ async function aggregateWeeklyData(
     {},
   );
 
-  // send the latest stats in a seperate key so website can render mindlessly
-  const currentYear = getCurrentYear();
-  const currentMonth = getCurrentMonth();
-  const latest = aggregated[currentYear][currentMonth];
-
-  return { ...aggregated, latest };
+  return { ...aggregated };
 }
 
 async function saveSleepStatsToVault(folderPath: string, savePath: string) {
   const stats = await aggregateWeeklyData(folderPath);
+  // send the latest stats in a seperate key so website can render mindlessly
+  const currentYear = getCurrentYear();
+  const currentMonth = getCurrentMonth();
+  const latest = stats[currentYear][currentMonth];
+
+  const statsToWrite = { ...stats, latest, currentYear, currentMonth };
 
   try {
     // Convert stats to JSON format
-    const statsJSON = JSON.stringify({ ...stats });
+    const statsJSON = JSON.stringify(statsToWrite);
 
     // Write the stats data to the file using Bun.write
     await Bun.write(savePath, statsJSON);

@@ -219,7 +219,6 @@ describe("aggregateWeeklyData", () => {
   it("should give aggerates of weekly data by month", async () => {
     const aggregated = await aggregateWeeklyData("./vault/ultrahuman");
 
-    expect(aggregated).toHaveProperty("latest");
     expect(aggregated).toHaveProperty("2023.10");
     expect(aggregated).toHaveProperty("2023.11");
     expect(aggregated).toHaveProperty("2023.12");
@@ -252,7 +251,8 @@ describe("saveSleepStatsToVault", () => {
   it("should fetchSheetData and save to specified file", async () => {
     await saveSleepStatsToVault(folderPath, savePath);
     const data = await aggregateWeeklyData(folderPath);
-    const dataOnDisk = await Bun.file(savePath).json();
+    const { latest, currentYear, currentMonth, ...dataOnDisk } =
+      await Bun.file(savePath).json();
 
     expect(JSON.stringify(dataOnDisk)).toBe(JSON.stringify(data));
   });

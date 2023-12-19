@@ -110,6 +110,7 @@ type WorkoutSheetData = {
   aggregates: YearlyWorkoutAggregates;
   currentYear: number;
   currentMonth: number;
+  weekdays: number;
   latest: Record<string, number>;
 };
 
@@ -121,6 +122,7 @@ async function fetchWorkoutSheetData(): Promise<WorkoutSheetData> {
 
   const currentYear = getCurrentYear();
   const currentMonth = getCurrentMonth();
+  const weekdays = getWeekdaysInMonth(currentYear, currentMonth);
 
   const countByYearMonth = dates.reduce<Record<number, Record<number, number>>>(
     (acc, date) => {
@@ -149,6 +151,7 @@ async function fetchWorkoutSheetData(): Promise<WorkoutSheetData> {
 
   return {
     latest: countByYearMonth[currentYear][currentMonth],
+    weekdays,
     currentYear,
     currentMonth,
     countByYearMonth,
