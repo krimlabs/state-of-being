@@ -43,3 +43,8 @@ jobs:
       - name: "🌎 Deploy to GitHub Pages"
         id: deployment
         uses: actions/deploy-pages@v3
+
+  deploy-website:
+    name: "🌏"
+    needs: [deploy]
+    uses: krimlabs/krimlabs.com/.github/workflows/cd.yml@master
