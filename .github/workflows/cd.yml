@@ -20,12 +20,13 @@ permissions:
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
 # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
-  group: "pages"
+  group: "state-of-being/pages"
   cancel-in-progress: false
 
 jobs:
   # Single deploy job since we're just deploying
   deploy:
+    name: "🌎 Deploy Vault"
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -45,6 +46,6 @@ jobs:
         uses: actions/deploy-pages@v3
 
   deploy-website:
-    name: "🌏"
+    name: "🎛️ Trigger Website"
     needs: [deploy]
     uses: krimlabs/krimlabs.com/.github/workflows/cd.yml@master
