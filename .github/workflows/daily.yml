@@ -73,3 +73,4 @@ jobs:
     name: "☁️"
     needs: [run-daily-tasks]
     uses: krimlabs/state-of-being/.github/workflows/cd.yml@master
+    secrets: inherit
