@@ -15,6 +15,7 @@ on:
 
 jobs:
   run-daily-tasks:
+    name: "👷 Run daily tasks"
     runs-on: ubuntu-latest
 
     env:
@@ -67,3 +68,8 @@ jobs:
           commit_user_email: "0x4444@users.noreply.github.com"
           commit_author: "0x4444 <0x4444@users.noreply.github.com>"
           file_pattern: "vault/*"
+
+  deploy:
+    name: "☁️"
+    needs: [run-daily-tasks]
+    uses: krimlabs/state-of-being/.github/workflows/cd.yml@master

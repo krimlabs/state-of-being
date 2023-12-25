@@ -15,6 +15,7 @@ on:
 
 jobs:
   run-monthly-tasks:
+    name: "👷 Run monthly tasks"
     runs-on: ubuntu-latest
 
     env:
@@ -40,3 +41,8 @@ jobs:
       - name: "🐒 Create workout key result for current month"
         if: "${{ github.event.inputs.year == '' && github.event.inputs.month == '' }}"
         run: bun run cli create-monthly-workout-key-result
+
+  deploy:
+    name: "☁️"
+    needs: [run-monthly-tasks]
+    uses: krimlabs/state-of-being/.github/workflows/cd.yml@master
