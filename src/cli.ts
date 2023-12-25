@@ -121,4 +121,5 @@ program
     }
   });
 
+console.log("Hello CLI");
 program.parse(process.argv);
