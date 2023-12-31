@@ -10,7 +10,7 @@ import {
 test("fetchSheetData", async () => {
   const result = await fetchWorkoutSheetData();
   const requiredKeys: Array<keyof WorkoutSheetData> = [
-    "countByYearMonth",
+    "byYearMonth",
     "aggregates",
     "currentYear",
     "currentMonth",
@@ -25,46 +25,121 @@ test("fetchSheetData", async () => {
   });
 
   // Check if keys in countByYearMonth exist in aggregates
-  const { countByYearMonth, aggregates } = result;
-  Object.keys(countByYearMonth).forEach((year) => {
+  const { byYearMonth, aggregates } = result;
+  Object.keys(byYearMonth).forEach((year) => {
     expect(aggregates).toHaveProperty(year);
   });
 });
 
 test("generateYearlyWorkoutAggregates", () => {
-  const countByYearMonth = {
+  const byYearMonth = {
     "2023": {
-      "5": 16,
-      "6": 19,
-      "7": 16,
-      "8": 17,
-      "9": 7,
-      "10": 7,
-      "11": 5,
-      "12": 6,
+      "5": {
+        count: 16,
+        target: 24,
+        showUpRate: "67",
+      },
+      "6": {
+        count: 19,
+        target: 22,
+        showUpRate: "86",
+      },
+      "7": {
+        count: 16,
+        target: 25,
+        showUpRate: "64",
+      },
+      "8": {
+        count: 17,
+        target: 21,
+        showUpRate: "81",
+      },
+      "9": {
+        count: 7,
+        target: 20,
+        showUpRate: "35",
+      },
+      "10": {
+        count: 7,
+        target: 26,
+        showUpRate: "27",
+      },
+      "11": {
+        count: 5,
+        target: 27,
+        showUpRate: "19",
+      },
+      "12": {
+        count: 6,
+        target: 28,
+        showUpRate: "21",
+      },
     },
     "2024": {
-      "1": 12,
-      "2": 14,
-      "3": 18,
-      "4": 22,
-      "5": 25,
-      "6": 28,
-      "7": 30,
-      "8": 19,
-      "9": 26,
-      "10": 20,
-      "11": 18,
-      "12": 15,
+      "1": {
+        count: 12,
+        target: 28,
+        showUpRate: "43",
+      },
+      "2": {
+        count: 14,
+        target: 25,
+        showUpRate: "56",
+      },
+      "3": {
+        count: 18,
+        target: 27,
+        showUpRate: "67",
+      },
+      "4": {
+        count: 22,
+        target: 24,
+        showUpRate: "92",
+      },
+      "5": {
+        count: 25,
+        target: 23,
+        showUpRate: "109",
+      },
+      "6": {
+        count: 28,
+        target: 27,
+        showUpRate: "104",
+      },
+      "7": {
+        count: 30,
+        target: 20,
+        showUpRate: "150",
+      },
+      "8": {
+        count: 19,
+        target: 22,
+        showUpRate: "86",
+      },
+      "9": {
+        count: 26,
+        target: 20,
+        showUpRate: "130",
+      },
+      "10": {
+        count: 20,
+        target: 26,
+        showUpRate: "77",
+      },
+      "11": {
+        count: 18,
+        target: 21,
+        showUpRate: "86",
+      },
+      "12": {
+        count: 15,
+        target: 27,
+        showUpRate: "56",
+      },
     },
   };
-
-  const aggregates2023 = generateYearlyWorkoutAggregates(
-    countByYearMonth["2023"],
-  );
-  const aggregates2024 = generateYearlyWorkoutAggregates(
-    countByYearMonth["2024"],
-  );
+  const aggregates2023 = generateYearlyWorkoutAggregates(byYearMonth["2023"]);
+  const aggregates2024 = generateYearlyWorkoutAggregates(byYearMonth["2024"]);
 
   expect(aggregates2023).toEqual({
     totalWorkouts: 93,

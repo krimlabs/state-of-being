@@ -9,6 +9,7 @@ import {
   getWeekdaysInMonth,
   getMonthName,
   getWeekdaysPassed,
+  getLastDayOfMonth,
 } from "@src/time";
 import {
   getNodeByWindmillState,
@@ -69,20 +70,20 @@ type YearlyWorkoutAggregates = {
 };
 
 function generateYearlyWorkoutAggregates(
-  countByMonth: Record<string, number>,
+  byMonth: Record<string, number>,
 ): YearlyWorkoutAggregates | null {
-  if (!countByMonth) {
+  if (!byMonth) {
     return null;
   }
 
-  const months = Object.entries(countByMonth);
+  const months = Object.entries(byMonth);
 
   if (months.length === 0) {
     return null;
   }
 
   const totalWorkouts = parseFloat(
-    months.reduce((acc, [, count]) => acc + count, 0).toFixed(2),
+    months.reduce((acc, [, { count }]) => acc + count, 0).toFixed(2),
   );
 
   const averageWorkoutsPerMonth = parseFloat(
@@ -90,12 +91,12 @@ function generateYearlyWorkoutAggregates(
   );
 
   const [monthWithMostWorkouts] = months.reduce(
-    (max, [month, count]) => (count > max[1] ? [month, count] : max),
+    (max, [month, { count }]) => (count > max[1] ? [month, count] : max),
     ["", 0],
   );
 
   const [monthWithLeastWorkouts] = months.reduce(
-    (min, [month, count]) => (count < min[1] ? [month, count] : min),
+    (min, [month, { count }]) => (count < min[1] ? [month, count] : min),
     ["", Infinity],
   );
   return {
@@ -106,14 +107,20 @@ function generateYearlyWorkoutAggregates(
   };
 }
 
+type MonthlyWorkoutData = {
+  count: number;
+  target: number;
+  showUpRate: string;
+};
+
 type WorkoutSheetData = {
-  countByYearMonth: Record<string, Record<string, number>>;
+  byYearMonth: Record<string, Record<string, MonthlyWorkoutData>>;
   aggregates: YearlyWorkoutAggregates;
   currentYear: number;
   currentMonth: number;
   weekdays: number;
   weekdaysPassed: number;
-  latest: Record<string, number>;
+  latest: MonthlyWorkoutData;
 };
 
 async function fetchWorkoutSheetData(): Promise<WorkoutSheetData> {
@@ -127,6 +134,7 @@ async function fetchWorkoutSheetData(): Promise<WorkoutSheetData> {
   const weekdays = getWeekdaysInMonth(currentYear, currentMonth);
   const weekdaysPassed = getWeekdaysPassed(currentYear, currentMonth);
 
+  // Get counts for every month
   const countByYearMonth = dates.reduce<Record<number, Record<number, number>>>(
     (acc, date) => {
       const year = date.getFullYear();
@@ -143,22 +151,54 @@ async function fetchWorkoutSheetData(): Promise<WorkoutSheetData> {
     {},
   );
 
-  const aggregates: YearlyWorkoutAggregates = Object.keys(
-    countByYearMonth,
-  ).reduce((acc, year: string) => {
-    return {
-      ...acc,
-      [year]: generateYearlyWorkoutAggregates(countByYearMonth[year]),
-    };
-  }, {});
+  // Compute show up rates
+  const byYearMonth = Object.entries(countByYearMonth).reduce(
+    (acc, [year, months]) => {
+      const updatedMonths = Object.entries(months).reduce(
+        (innerAcc, [month, count]) => {
+          const target = getWeekdaysInMonth(Number(year), Number(month));
+          const showUpRate = ((count * 100) / target).toFixed(0);
+
+          innerAcc[month] = {
+            target,
+            count,
+            showUpRate,
+          };
+
+          return innerAcc;
+        },
+        {} as {
+          [month: string]: {
+            target: number;
+            count: number;
+            showUpRate: string;
+          };
+        },
+      );
+
+      acc[year] = updatedMonths;
+      return acc;
+    },
+    {},
+  );
+
+  const aggregates: YearlyWorkoutAggregates = Object.keys(byYearMonth).reduce(
+    (acc, year: string) => {
+      return {
+        ...acc,
+        [year]: generateYearlyWorkoutAggregates(byYearMonth[year]),
+      };
+    },
+    {},
+  );
 
   return {
-    latest: countByYearMonth[currentYear][currentMonth],
+    latest: byYearMonth[currentYear][currentMonth],
     weekdays,
     weekdaysPassed,
     currentYear,
     currentMonth,
-    countByYearMonth,
+    byYearMonth,
     aggregates,
   };
 }

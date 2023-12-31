@@ -28,11 +28,12 @@ describe("fetchDataAndComputeAggregates", async () => {
         numMeditations: expect.any(Number),
         avgObservationsPerDay: expect.any(String),
         avgMeditationsPerDay: expect.any(String),
-        medatationsMissedDaysCount: expect.any(Number),
+        meditationsMissedDaysCount: expect.any(Number),
         observationsMissedDayCount: expect.any(Number),
         satButCouldNotMeditateCount: expect.any(Number),
         waterBoiledMeditationsCount: expect.any(Number),
         meditationEfficiency: expect.any(String),
+        showUpRate: expect.any(String),
       }),
     );
   });

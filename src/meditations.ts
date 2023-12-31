@@ -140,14 +140,16 @@ function generateChartURL(jsonData: object): string {
 type Stats = {
   numMeditations: number;
   numObservations: number;
-  mediationEfficiency: string;
+  meditationEfficiency: string;
   avgMeditationsPerDay: string;
   avgObservationsPerDay: string;
-  medatationsMissedDaysCount: number;
+  meditationsMissedDaysCount: number;
   observationsMissedDayCount: number;
   waterBoiledMeditationsCount: number;
   satButCouldNotMeditateCount: number;
+  showUpRate: string;
 };
+
 function generateWhatsAppMessage(
   stats: Stats,
   causesChartUrl: string,
@@ -159,7 +161,7 @@ function generateWhatsAppMessage(
     mediationEfficiency,
     avgMeditationsPerDay,
     avgObservationsPerDay,
-    medatationsMissedDaysCount,
+    meditationsMissedDaysCount,
     observationsMissedDayCount,
     waterBoiledMeditationsCount,
     satButCouldNotMeditateCount,
@@ -173,7 +175,7 @@ function generateWhatsAppMessage(
 📈 *Meditation Efficiency*: ${mediationEfficiency}
 🌅 *Avg. Meditations per Day*: ${avgMeditationsPerDay}
 📅 *Avg. Observations per Day*: ${avgObservationsPerDay}
-🚫 *Missed Meditation Days*: ${medatationsMissedDaysCount}
+🚫 *Missed Meditation Days*: ${meditationsMissedDaysCount}
 🚷 *Missed Observation Days*: ${observationsMissedDayCount}
 😞 *Sat But Could Not Meditate Days*: ${satButCouldNotMeditateCount}
 💧 *Water Boiled During Meditations*: ${waterBoiledMeditationsCount}
@@ -188,17 +190,7 @@ function generateWhatsAppMessage(
 type MeditationAggregate = {
   month: number;
   year: number;
-  stats: {
-    numObservations: number;
-    numMeditations: number;
-    avgObservationsPerDay: string;
-    avgMeditationsPerDay: string;
-    medatationsMissedDaysCount: number;
-    observationsMissedDayCount: number;
-    satButCouldNotMeditateCount: number;
-    waterBoiledMeditationsCount: number;
-    meditationEfficiency: string;
-  };
+  stats: Stats;
   egosObservedFrequencyDistribution: Record<string, number>;
   egosInMeditationFrequencyDistribution: Record<string, number>;
   underlyingCausesObservedFrequencyDistribution: Record<string, number>;
@@ -221,20 +213,11 @@ async function fetchDataAndComputeAggregates(
   // Fetch base observations and meditations
 
   const observations = await getObservationsForMonthAndYear(token, month, year);
-  const allMeditations = await getMeditationsForMonthAndYear(
-    token,
-    month,
-    year,
-  );
+  const meditations = await getMeditationsForMonthAndYear(token, month, year);
 
-  const satButCouldNotMeditateCount = allMeditations.filter(
-    (m) => m.properties["Don't Count?"].checkbox,
+  const satButCouldNotMeditateCount = meditations.filter(
+    (m) => m.properties["Didn't work at all?"].checkbox,
   ).length;
-
-  // Remove the meditations where I sat down but wasn't able to meditate
-  const meditations = allMeditations.filter(
-    (m) => !m.properties["Don't Count?"].checkbox,
-  );
 
   // Find out all dates I missed observing of meditating
   const observationDates = observations.map(
@@ -312,7 +295,7 @@ async function fetchDataAndComputeAggregates(
     avgMeditationsPerDay: (meditations.length / totalDaysInThisMonth).toFixed(
       2,
     ),
-    medatationsMissedDaysCount: meditationMissingDays.count,
+    meditationsMissedDaysCount: meditationMissingDays.count,
     observationsMissedDayCount: observationsMissingDays.count,
     satButCouldNotMeditateCount,
     waterBoiledMeditationsCount,
@@ -320,6 +303,11 @@ async function fetchDataAndComputeAggregates(
       (waterBoiledMeditationsCount * 100) /
       meditations.length
     ).toFixed(2),
+    target: getLastDayOfMonth(currentYear, currentMonth),
+    showUpRate: (
+      ((totalDaysInThisMonth - meditationMissingDays.count) * 100) /
+      totalDaysInThisMonth
+    ).toFixed(0),
   };
 
   // Compute config for bar charts

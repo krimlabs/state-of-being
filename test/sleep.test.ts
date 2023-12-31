@@ -193,6 +193,8 @@ describe("extractContributors", async () => {
         "HRV Form",
         "Temperature Deviation",
         "Restfulness",
+        "Temperature",
+        "Restorative Sleep",
         "Total Sleep",
         "Workout Frequency",
         "Sleep Quotient",
