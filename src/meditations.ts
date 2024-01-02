@@ -158,7 +158,7 @@ function generateWhatsAppMessage(
   const {
     numMeditations,
     numObservations,
-    mediationEfficiency,
+    meditationEfficiency,
     avgMeditationsPerDay,
     avgObservationsPerDay,
     meditationsMissedDaysCount,
@@ -172,7 +172,7 @@ function generateWhatsAppMessage(
 ----------------------
 💭 *Total Meditations*: ${numMeditations}
 👀 *Total Observations*: ${numObservations}
-📈 *Meditation Efficiency*: ${mediationEfficiency}
+📈 *Meditation Efficiency*: ${meditationEfficiency}
 🌅 *Avg. Meditations per Day*: ${avgMeditationsPerDay}
 📅 *Avg. Observations per Day*: ${avgObservationsPerDay}
 🚫 *Missed Meditation Days*: ${meditationsMissedDaysCount}
@@ -311,22 +311,22 @@ async function fetchDataAndComputeAggregates(
   };
 
   // Compute config for bar charts
-  // const egosBarChartConfig = generateBarChartConfig(
-  //   egosObservedFrequencyDistribution,
-  //   egosInMeditationFrequencyDistribution,
-  //   "Observed egos",
-  //   "Meditated on egos",
-  // );
+  const egosBarChartConfig = generateBarChartConfig(
+    egosObservedFrequencyDistribution,
+    egosInMeditationFrequencyDistribution,
+    "Observed egos",
+    "Meditated on egos",
+  );
 
-  // const causesBarChartConfig = generateBarChartConfig(
-  //   underlyingCausesObservedFrequencyDistribution,
-  //   underlyingCausesMeditatedOnFrequencyDistribution,
-  //   "Observed egos",
-  //   "Meditated on egos",
-  // );
+  const causesBarChartConfig = generateBarChartConfig(
+    underlyingCausesObservedFrequencyDistribution,
+    underlyingCausesMeditatedOnFrequencyDistribution,
+    "Observed egos",
+    "Meditated on egos",
+  );
 
-  // const egosBarChartUrl = generateChartURL(egosBarChartConfig);
-  // const causesChartUrl = generateChartURL(causesBarChartConfig);
+  const egosBarChartUrl = generateChartURL(egosBarChartConfig);
+  const causesChartUrl = generateChartURL(causesBarChartConfig);
   const totalPackage = {
     month,
     year,
