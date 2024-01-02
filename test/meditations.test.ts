@@ -5,6 +5,7 @@ import {
 import { unlink } from "node:fs/promises";
 import config from "@src/config";
 import { expect, describe, it, beforeAll, afterAll, test } from "bun:test";
+import { getObservationsForMonthAndYear } from "@src/notion";
 
 function isValidYearMonth(year: number, month: number) {
   // Create a date object with the given year and month (months are 0-based in JavaScript)
@@ -16,6 +17,11 @@ function isValidYearMonth(year: number, month: number) {
 
 describe("fetchDataAndComputeAggregates", async () => {
   const aggregate = await fetchDataAndComputeAggregates(config.NOTION_TOKEN);
+  const forMonthAggregates = await fetchDataAndComputeAggregates(
+    config.NOTION_TOKEN,
+    1,
+    2024,
+  );
 
   it("has a valid year and month attached", () => {
     expect(isValidYearMonth(aggregate.year, aggregate.month)).toBe(true);
@@ -36,6 +42,22 @@ describe("fetchDataAndComputeAggregates", async () => {
         showUpRate: expect.any(String),
       }),
     );
+  });
+
+  it("has correct year and month when passed", () => {
+    expect(forMonthAggregates.year).toBe(2024);
+    expect(forMonthAggregates.month).toBe(1);
+  });
+
+  it("gets data even with month as 1", async () => {
+    // Notion filters fail if you pass the date as 01-1-2024
+    // It has to be 01-01-2024
+    const observations = await getObservationsForMonthAndYear(
+      config.NOTION_TOKEN,
+      1,
+      2024,
+    );
+    expect(observations.length > 0);
   });
 });
 

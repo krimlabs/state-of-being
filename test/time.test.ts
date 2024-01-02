@@ -5,6 +5,7 @@ import {
   getMonthName,
   hasMonthPassed,
   getLastDayOfMonth,
+  getPreviousMonthAndYear,
 } from "@src/time";
 
 describe("getCurrentDate", () => {
@@ -50,5 +51,24 @@ describe("getLastDayOfMonth", () => {
   it("should return the last day of the month for a given year and month", () => {
     const lastDayOfMonth = getLastDayOfMonth(2023, 12);
     expect(lastDayOfMonth).toBe(31);
+  });
+});
+
+describe("getPreviousMonthAndYear", () => {
+  it("should return correct previous month and year for various inputs", () => {
+    expect(getPreviousMonthAndYear(3, 2023)).toEqual({
+      prevMonth: 2,
+      prevYear: 2023,
+    });
+
+    expect(getPreviousMonthAndYear(1, 2023)).toEqual({
+      prevMonth: 12,
+      prevYear: 2022,
+    });
+
+    expect(getPreviousMonthAndYear(12, 2020)).toEqual({
+      prevMonth: 11,
+      prevYear: 2020,
+    });
   });
 });

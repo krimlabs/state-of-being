@@ -10,6 +10,7 @@ import {
   getCurrentDay,
   getCurrentMonth,
   getCurrentYear,
+  getPreviousMonthAndYear,
   hasMonthPassed,
 } from "@src/time";
 
@@ -372,7 +373,7 @@ async function saveMeditationAggregatesToVault(
       ? await Bun.file(savePath).json()
       : {};
 
-    // Convert stats to JSON format
+    // Add newly fetched aggregates to existing aggregates on disk
     const updatedAggregates = {
       ...existingAggregates,
       [aggregates.year]: {
@@ -382,10 +383,26 @@ async function saveMeditationAggregatesToVault(
     };
 
     // compute dashboard info here so UI does not need to mangle with time
-    const latestForDashboard = {
-      ...updatedAggregates[currentYear][currentMonth],
-      ...{ currentDay, currentYear, currentMonth },
-    };
+    const haveDataForThisMonth =
+      updatedAggregates.hasOwnProperty(currentYear) &&
+      updatedAggregates[currentYear].hasOwnProperty(currentMonth);
+
+    const latestForDashboard = haveDataForThisMonth
+      ? {
+          ...updatedAggregates[currentYear][currentMonth],
+          ...{ currentDay, currentYear, currentMonth },
+        }
+      : (() => {
+          // If stats for this month don't exist, write previous month stats as latest for dash
+          const { prevYear, prevMonth } = getPreviousMonthAndYear(
+            currentMonth,
+            currentYear,
+          );
+          return {
+            ...updatedAggregates[prevYear][prevMonth],
+            ...{ currentDay, currentYear: prevYear, currentMonth: prevMonth },
+          };
+        })();
 
     // Write the stats data to the file using Bun.write
     await Bun.write(

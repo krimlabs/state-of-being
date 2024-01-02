@@ -139,7 +139,7 @@ async function getObservationsForMonthAndYear(
         {
           property: "Date",
           date: {
-            on_or_after: `${year}-${month}-01`,
+            on_or_after: `${year}-${month < 10 && 0}${month}-01`,
             is_not_empty: true,
           },
         },
@@ -147,7 +147,9 @@ async function getObservationsForMonthAndYear(
           property: "Date",
           date: {
             is_not_empty: true,
-            on_or_before: `${year}-${month}-${getLastDayOfMonth(year, month)}`,
+            on_or_before: `${year}-${
+              month < 10 && 0
+            }${month}-${getLastDayOfMonth(year, month)}`,
           },
         },
       ],
@@ -184,7 +186,7 @@ async function getMeditationsForMonthAndYear(
         {
           property: "Date",
           date: {
-            on_or_after: `${year}-${month}-01`,
+            on_or_after: `${year}-${month < 10 && 0}${month}-01`,
             is_not_empty: true,
           },
         },
@@ -192,7 +194,9 @@ async function getMeditationsForMonthAndYear(
           property: "Date",
           date: {
             is_not_empty: true,
-            on_or_before: `${year}-${month}-${getLastDayOfMonth(year, month)}`,
+            on_or_before: `${year}-${
+              month < 10 && 0
+            }${month}-${getLastDayOfMonth(year, month)}`,
           },
         },
       ],

@@ -141,6 +141,17 @@ function getWeekdaysPassed(year: number, month: number): number {
   }
 }
 
+function getPreviousMonthAndYear(
+  month: number,
+  year: number,
+): { prevMonth: number; prevYear: number } {
+  if (month === 1) {
+    return { prevMonth: 12, prevYear: year - 1 };
+  } else {
+    return { prevMonth: month - 1, prevYear: year };
+  }
+}
+
 export {
   addNDaysToDate,
   getCurrentDate,
@@ -152,4 +163,5 @@ export {
   hasMonthPassed,
   getLastDayOfMonth,
   getWeekdaysPassed,
+  getPreviousMonthAndYear,
 };
