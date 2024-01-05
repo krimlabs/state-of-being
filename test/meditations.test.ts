@@ -4,7 +4,7 @@ import {
 } from "@src/meditations";
 import { unlink } from "node:fs/promises";
 import config from "@src/config";
-import { expect, describe, it, beforeAll, afterAll, test } from "bun:test";
+import { expect, describe, it, afterAll } from "bun:test";
 import { getObservationsForMonthAndYear } from "@src/notion";
 
 function isValidYearMonth(year: number, month: number) {

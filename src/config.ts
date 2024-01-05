@@ -19,4 +19,5 @@ export default {
   ultrahumanFolderPath: "./vault/ultrahuman",
   ultrahumanSleepAggregatesSavePath: "./vault/ultrahuman/sleep.json",
   meditationAggregatesSavePath: "./vault/meditations.json",
+  targetObservationsPerDay: 3,
 };

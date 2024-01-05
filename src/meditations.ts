@@ -390,7 +390,13 @@ async function saveMeditationAggregatesToVault(
     const latestForDashboard = haveDataForThisMonth
       ? {
           ...updatedAggregates[currentYear][currentMonth],
-          ...{ currentDay, currentYear, currentMonth },
+          ...{
+            currentDay,
+            currentYear,
+            currentMonth,
+            daysInCurrentMonth: getLastDayOfMonth(currentYear, currentMonth),
+            targetObservationsPerDay: config.targetObservationsPerDay,
+          },
         }
       : (() => {
           // If stats for this month don't exist, write previous month stats as latest for dash
@@ -398,9 +404,16 @@ async function saveMeditationAggregatesToVault(
             currentMonth,
             currentYear,
           );
+          const daysInLastMonth = getLastDayOfMonth(prevYear, prevMonth);
           return {
             ...updatedAggregates[prevYear][prevMonth],
-            ...{ currentDay, currentYear: prevYear, currentMonth: prevMonth },
+            ...{
+              currentDay: daysInLastMonth,
+              currentYear: prevYear,
+              currentMonth: prevMonth,
+              daysInCurrentMonth: daysInLastMonth,
+              targetObservationsPerDay: config.targetObservationsPerDay,
+            },
           };
         })();
 
