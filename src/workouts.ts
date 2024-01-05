@@ -157,7 +157,7 @@ async function fetchWorkoutSheetData(): Promise<WorkoutSheetData> {
       const updatedMonths = Object.entries(months).reduce(
         (innerAcc, [month, count]) => {
           const target = getWeekdaysInMonth(Number(year), Number(month));
-          const showUpRate = ((count * 100) / target).toFixed(0);
+          const showUpRate = ((count * 100) / weekdaysPassed).toFixed(0);
 
           innerAcc[month] = {
             target,
