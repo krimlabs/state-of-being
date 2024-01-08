@@ -219,7 +219,7 @@ async function setCurrentValueOfWorkoutKeyResult(
   if (workoutKeyResult.results.length > 0) {
     const id = workoutKeyResult.results[0].id;
     const sheetData = await fetchWorkoutSheetData();
-    const newVal = sheetData.countByYearMonth[year][month];
+    const newVal = sheetData.byYearMonth[year][month].count;
 
     try {
       await updateNotionPage(config.NOTION_TOKEN, id, {
