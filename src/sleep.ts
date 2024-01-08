@@ -153,6 +153,14 @@ async function saveUltrahumanInsightsToVault(token: string, savePath: string) {
 
   const insightsRaw = await fetchInsights(token, nextWeekStart);
   const insights = insightsRaw.data;
+
+  if (!insights.average_scores.sleep_index.value) {
+    return {
+      msg: "Indices are null, returning",
+      lastSavedWeekStart,
+    };
+  }
+
   const insightWeekStart = insights.weeks.week_0.start;
 
   if (lastSavedWeekStart === insightWeekStart) {

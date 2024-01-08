@@ -2,7 +2,8 @@ name: "☀️ Daily tasks"
 
 on:
   schedule:
-    - cron: "0 0 * * *"
+    # Run daily at 11:30 pm
+    - cron: "30 23 * * *"
 
   workflow_dispatch:
     inputs:
