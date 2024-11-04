@@ -19,12 +19,12 @@ program
   .option(
     "-y, --year <year>",
     "Year for the workout key result",
-    getCurrentYear(),
+    getCurrentYear()
   )
   .option(
     "-m, --month <month>",
     "Month for the workout key result",
-    getCurrentMonth(),
+    getCurrentMonth()
   )
   .action(async (options) => {
     try {
@@ -41,12 +41,12 @@ program
   .option(
     "-y, --year <year>",
     "Year for the workout key result",
-    getCurrentYear(),
+    getCurrentYear()
   )
   .option(
     "-m, --month <month>",
     "Month for the workout key result",
-    getCurrentMonth(),
+    getCurrentMonth()
   )
   .action(async (options) => {
     try {
@@ -73,7 +73,7 @@ program.command("save-next-sleep-stats-to-vault").action(async () => {
     const folderPath = config.ultrahumanFolderPath;
     const res = await saveUltrahumanInsightsToVault(
       config.ULTRAHUMAN_R1_TOKEN,
-      folderPath,
+      folderPath
     );
     console.log(res);
   } catch (error) {
@@ -85,7 +85,7 @@ program.command("save-sleep-aggregate-stats-to-vault").action(async () => {
   try {
     const res = await saveSleepStatsToVault(
       config.ultrahumanFolderPath,
-      config.ultrahumanSleepAggregatesSavePath,
+      config.ultrahumanSleepAggregatesSavePath
     );
     console.log(res);
   } catch (error) {
@@ -99,12 +99,12 @@ program
   .option(
     "-y, --year <year>",
     "Year for which to compute aggregates",
-    getCurrentYear(),
+    getCurrentYear()
   )
   .option(
     "-m, --month <month>",
     "Month for which to compute aggregates",
-    getCurrentMonth(),
+    getCurrentMonth()
   )
   .action(async (options: { year?: number; month?: number }) => {
     try {
@@ -113,7 +113,7 @@ program
         config.meditationAggregatesSavePath,
         config.NOTION_TOKEN,
         month,
-        year,
+        year
       );
       console.log(result);
     } catch (error) {

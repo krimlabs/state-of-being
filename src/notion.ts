@@ -35,7 +35,7 @@ enum WindmillStateContains {
 
 async function retrieveNotionPage(
   token: string,
-  params: GetPageParameters,
+  params: GetPageParameters
 ): GetPageResponse {
   const notion = new Client({
     auth: token,
@@ -51,7 +51,7 @@ async function createNotionPage<T extends PropertiesMap>(
   token: string,
   databaseId: string,
   properties: T,
-  emoji: string,
+  emoji: string
 ): Promise<void> {
   const notion = new Client({ auth: token });
 
@@ -80,7 +80,7 @@ type UpdateOptions = {
 async function updateNotionPage(
   token: string,
   pageId: string,
-  updateOptions: UpdateOptions,
+  updateOptions: UpdateOptions
 ) {
   const notion = new Client({ auth: token });
 
@@ -98,7 +98,7 @@ async function updateNotionPage(
 
 async function queryNotionDb(
   token: string,
-  queryParams: QueryDatabaseBodyParameters,
+  queryParams: QueryDatabaseBodyParameters
 ): QueryDatabaseResponse {
   const notion = new Client({
     auth: token,
@@ -109,7 +109,7 @@ async function queryNotionDb(
 
 async function* notionDbResultsGenerator(
   token: string,
-  queryParams: QueryDatabaseBodyParameters,
+  queryParams: QueryDatabaseBodyParameters
 ) {
   let start_cursor = undefined;
   while (true) {
@@ -129,7 +129,7 @@ async function getObservationsForMonthAndYear(
   token: string,
   month: number,
   year: number,
-  perPage = 100,
+  perPage = 100
 ) {
   const observationsRes = await notionDbResultsGenerator(token, {
     database_id: config.notionDbIds.observations,
@@ -139,7 +139,7 @@ async function getObservationsForMonthAndYear(
         {
           property: "Date",
           date: {
-            on_or_after: `${year}-${month < 10 && 0}${month}-01`,
+            on_or_after: `${year}-${month < 10 ? 0 : ""}${month}-01`,
             is_not_empty: true,
           },
         },
@@ -148,7 +148,7 @@ async function getObservationsForMonthAndYear(
           date: {
             is_not_empty: true,
             on_or_before: `${year}-${
-              month < 10 && 0
+              month < 10 ? 0 : ""
             }${month}-${getLastDayOfMonth(year, month)}`,
           },
         },
@@ -176,7 +176,7 @@ async function getMeditationsForMonthAndYear(
   token: string,
   month: number,
   year: number,
-  perPage = 100,
+  perPage = 100
 ) {
   const res = await notionDbResultsGenerator(token, {
     database_id: config.notionDbIds.meditations,
@@ -186,7 +186,7 @@ async function getMeditationsForMonthAndYear(
         {
           property: "Date",
           date: {
-            on_or_after: `${year}-${month < 10 && 0}${month}-01`,
+            on_or_after: `${year}-${month < 10 ? 0 : ""}${month}-01`,
             is_not_empty: true,
           },
         },
@@ -195,7 +195,7 @@ async function getMeditationsForMonthAndYear(
           date: {
             is_not_empty: true,
             on_or_before: `${year}-${
-              month < 10 && 0
+              month < 10 ? 0 : ""
             }${month}-${getLastDayOfMonth(year, month)}`,
           },
         },
@@ -250,7 +250,7 @@ async function markStatus(
   dbId: string,
   filterWindmillStateContains: WindmillStateContains,
   currentStatusEquals: Statuses,
-  markStatusAs: Statuses,
+  markStatusAs: Statuses
 ) {
   const res = await queryNotionDb(token, {
     database_id: dbId,
@@ -290,7 +290,7 @@ async function markStatus(
       } catch (e) {
         console.log(e);
       }
-    }),
+    })
   );
   return updatedStatus;
 }
@@ -305,7 +305,7 @@ async function createMonthlyKeyResultPage(
   emoji: string,
   status: Statuses,
   forYear?: number,
-  forMonth?: number,
+  forMonth?: number
 ) {
   const year = forYear || getCurrentYear();
   const month = forMonth || getCurrentMonth();
@@ -329,7 +329,7 @@ async function createMonthlyKeyResultPage(
       config.notionDbIds.nodes,
       forWindmillState,
       Statuses.IN_PROGRESS,
-      Statuses.DONE,
+      Statuses.DONE
     );
 
     // Now create a new page
@@ -372,7 +372,7 @@ async function createMonthlyKeyResultPage(
           },
         },
       },
-      emoji,
+      emoji
     );
 
     return {
@@ -410,7 +410,7 @@ function computeFrequencies(list: string[]): { [key: string]: number } {
 // Validates if a string value exists within a given enum object.
 function validateEnumString<T extends string>(
   enumObject: { [key: string]: T },
-  value: string,
+  value: string
 ): T {
   if (Object.values(enumObject).includes(value as T)) {
     return value as T;
