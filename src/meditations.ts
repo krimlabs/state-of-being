@@ -1,9 +1,12 @@
 import {
   computeFrequencies,
+  WindmillStateContains,
   flattenList,
   getLastDayOfMonth,
   getMeditationsForMonthAndYear,
   getObservationsForMonthAndYear,
+  createMonthlyKeyResultPage,
+  Statuses,
 } from "@src/notion";
 
 import {
@@ -12,6 +15,7 @@ import {
   getCurrentYear,
   getPreviousMonthAndYear,
   hasMonthPassed,
+  getMonthName,
 } from "@src/time";
 
 import config from "@src/config";
@@ -25,11 +29,11 @@ function countMissingDays(
   datesList: string[],
   year: number,
   month: number,
-  numberOfDays: number,
+  numberOfDays: number
 ): MissingDaysReturn {
   const missingDays = Array.from(
     { length: numberOfDays },
-    (_, index) => index + 1,
+    (_, index) => index + 1
   )
     .map((day) => {
       const formattedDay = day < 10 ? `0${day}` : `${day}`;
@@ -37,7 +41,7 @@ function countMissingDays(
       return `${year}-${formattedMonth}-${formattedDay}`;
     })
     .filter(
-      (currentDate) => !datesList.some((date) => date.startsWith(currentDate)),
+      (currentDate) => !datesList.some((date) => date.startsWith(currentDate))
     );
 
   return {
@@ -54,7 +58,7 @@ function generateBarChartConfig(
   observedFrequency: FrequencyDistributionMap,
   meditatedFrequency: FrequencyDistributionMap,
   observedLabel: string,
-  meditatedLabel: string,
+  meditatedLabel: string
 ): any {
   const labelsSet = new Set<string>([
     ...Object.keys(observedFrequency),
@@ -131,7 +135,7 @@ function generateChartURL(jsonData: object): string {
   const queryString = Object.entries(queryParams)
     .map(
       ([key, value]) =>
-        `${encodeURIComponent(key)}=${encodeURIComponent(value)}`,
+        `${encodeURIComponent(key)}=${encodeURIComponent(value)}`
     )
     .join("&");
 
@@ -151,43 +155,6 @@ type Stats = {
   showUpRate: string;
 };
 
-function generateWhatsAppMessage(
-  stats: Stats,
-  causesChartUrl: string,
-  egosBarChartUrl: string,
-): string {
-  const {
-    numMeditations,
-    numObservations,
-    meditationEfficiency,
-    avgMeditationsPerDay,
-    avgObservationsPerDay,
-    meditationsMissedDaysCount,
-    observationsMissedDayCount,
-    waterBoiledMeditationsCount,
-    satButCouldNotMeditateCount,
-  } = stats;
-
-  const message = `
-🧘‍♂️ *Meditation Stats*
-----------------------
-💭 *Total Meditations*: ${numMeditations}
-👀 *Total Observations*: ${numObservations}
-📈 *Meditation Efficiency*: ${meditationEfficiency}
-🌅 *Avg. Meditations per Day*: ${avgMeditationsPerDay}
-📅 *Avg. Observations per Day*: ${avgObservationsPerDay}
-🚫 *Missed Meditation Days*: ${meditationsMissedDaysCount}
-🚷 *Missed Observation Days*: ${observationsMissedDayCount}
-😞 *Sat But Could Not Meditate Days*: ${satButCouldNotMeditateCount}
-💧 *Water Boiled During Meditations*: ${waterBoiledMeditationsCount}
-\n
-📊 *Causes Chart*: ${causesChartUrl}\n
-📊 *Egos Bar Chart*: ${egosBarChartUrl}\n
-`;
-
-  return message;
-}
-
 type MeditationAggregate = {
   month: number;
   year: number;
@@ -201,7 +168,7 @@ type MeditationAggregate = {
 async function fetchDataAndComputeAggregates(
   token: string,
   forMonth?: number,
-  forYear?: number,
+  forYear?: number
 ): Promise<MeditationAggregate> {
   const currentMonth = getCurrentMonth();
   const currentYear = getCurrentYear();
@@ -217,40 +184,40 @@ async function fetchDataAndComputeAggregates(
   const meditations = await getMeditationsForMonthAndYear(token, month, year);
 
   const satButCouldNotMeditateCount = meditations.filter(
-    (m) => m.properties["Didn't work at all?"].checkbox,
+    (m) => m.properties["Didn't work at all?"].checkbox
   ).length;
 
   // Find out all dates I missed observing of meditating
   const observationDates = observations.map(
-    (o) => o.properties["Date"].date.start,
+    (o) => o.properties["Date"].date.start
   );
   const meditationDates = meditations.map(
-    (o) => o.properties["Date"].date.start,
+    (o) => o.properties["Date"].date.start
   );
 
   const observationsMissingDays = countMissingDays(
     observationDates,
     year,
     month,
-    totalDaysInThisMonth,
+    totalDaysInThisMonth
   );
 
   const meditationMissingDays = countMissingDays(
     meditationDates,
     year,
     month,
-    totalDaysInThisMonth,
+    totalDaysInThisMonth
   );
 
   // Find the most observed and meditated upon egos
   const egosObserved = flattenList(
-    observations.map((o) => o.properties.Egos.multi_select?.map((m) => m.name)),
+    observations.map((o) => o.properties.Egos.multi_select?.map((m) => m.name))
   );
 
   const egosObservedFrequencyDistribution = computeFrequencies(egosObserved);
 
   const egosMeditatedOn = flattenList(
-    meditations.map((o) => o.properties.Egos.multi_select?.map((m) => m.name)),
+    meditations.map((o) => o.properties.Egos.multi_select?.map((m) => m.name))
   );
 
   const egosInMeditationFrequencyDistribution =
@@ -258,32 +225,30 @@ async function fetchDataAndComputeAggregates(
 
   // Find out most observed underlying causes and most meditated upon underlying causes
   const underlyingCausesObserved = flattenList(
-    observations.map(
-      (o) => o.properties["Underlying cause"].multi_select?.map((m) => m.name),
-    ),
+    observations.map((o) =>
+      o.properties["Underlying cause"].multi_select?.map((m) => m.name)
+    )
   );
 
   const underlyingCausesObservedFrequencyDistribution = computeFrequencies(
-    underlyingCausesObserved,
+    underlyingCausesObserved
   );
 
   const underlyingCausesMeditatedOn = flattenList(
     meditations.map((m) =>
       (
         m.properties["Observation underlying causes"].formula["string"] || ""
-      ).split(","),
-    ),
+      ).split(",")
+    )
   ).flat();
 
   const underlyingCausesMeditatedOnFrequencyDistribution = computeFrequencies(
-    underlyingCausesMeditatedOn.filter(
-      (uc: string) => uc !== "" && uc !== null,
-    ),
+    underlyingCausesMeditatedOn.filter((uc: string) => uc !== "" && uc !== null)
   );
 
   // Compute number of water boiled meditations
   const waterBoiledMeditationsCount = meditations.filter(
-    (m) => m.properties["Water boiled ?"].checkbox,
+    (m) => m.properties["Water boiled ?"].checkbox
   ).length;
 
   // Compute stats to send out
@@ -291,10 +256,10 @@ async function fetchDataAndComputeAggregates(
     numObservations: observations.length,
     numMeditations: meditations.length,
     avgObservationsPerDay: (observations.length / totalDaysInThisMonth).toFixed(
-      2,
+      2
     ),
     avgMeditationsPerDay: (meditations.length / totalDaysInThisMonth).toFixed(
-      2,
+      2
     ),
     meditationsMissedDaysCount: meditationMissingDays.count,
     observationsMissedDayCount: observationsMissingDays.count,
@@ -316,14 +281,14 @@ async function fetchDataAndComputeAggregates(
     egosObservedFrequencyDistribution,
     egosInMeditationFrequencyDistribution,
     "Observed egos",
-    "Meditated on egos",
+    "Meditated on egos"
   );
 
   const causesBarChartConfig = generateBarChartConfig(
     underlyingCausesObservedFrequencyDistribution,
     underlyingCausesMeditatedOnFrequencyDistribution,
     "Observed egos",
-    "Meditated on egos",
+    "Meditated on egos"
   );
 
   const egosBarChartUrl = generateChartURL(egosBarChartConfig);
@@ -354,12 +319,12 @@ async function saveMeditationAggregatesToVault(
   savePath: string,
   token: string,
   forMonth?: number,
-  forYear?: number,
+  forYear?: number
 ) {
   const aggregates = await fetchDataAndComputeAggregates(
     token,
     forMonth,
-    forYear,
+    forYear
   );
 
   const currentMonth = getCurrentMonth();
@@ -402,7 +367,7 @@ async function saveMeditationAggregatesToVault(
           // If stats for this month don't exist, write previous month stats as latest for dash
           const { prevYear, prevMonth } = getPreviousMonthAndYear(
             currentMonth,
-            currentYear,
+            currentYear
           );
           const daysInLastMonth = getLastDayOfMonth(prevYear, prevMonth);
           return {
@@ -420,7 +385,7 @@ async function saveMeditationAggregatesToVault(
     // Write the stats data to the file using Bun.write
     await Bun.write(
       savePath,
-      JSON.stringify({ ...updatedAggregates, latestForDashboard }),
+      JSON.stringify({ ...updatedAggregates, latestForDashboard })
     );
 
     return {
@@ -439,8 +404,70 @@ async function saveMeditationAggregatesToVault(
   }
 }
 
+async function createMonthlyMeditationsKeyResult(
+  forYear?: number,
+  forMonth?: number
+) {
+  const year = forYear || getCurrentYear();
+  const month = forMonth || getCurrentMonth();
+
+  const totalDays = getLastDayOfMonth(year, month);
+  const monthName = getMonthName(month);
+  const title = `Meditate ${totalDays} times during ${monthName}, ${year} ⁂`;
+  const emoji = "🕊️";
+
+  try {
+    return await createMonthlyKeyResultPage(
+      config.NOTION_TOKEN,
+      title,
+      totalDays,
+      [config.anchorNodeIds.meditateEveryDayObj],
+      WindmillStateContains.AUTO_MEDITATION,
+      emoji,
+      Statuses.IN_PROGRESS,
+      year,
+      month
+    );
+  } catch (error) {
+    return { msg: "Unable to create new page" };
+  }
+}
+
+async function createMonthlyObservationsKeyResult(
+  forYear?: number,
+  forMonth?: number
+) {
+  const year = forYear || getCurrentYear();
+  const month = forMonth || getCurrentMonth();
+
+  const totalDays = getLastDayOfMonth(year, month);
+  const monthName = getMonthName(month);
+  const title = `Make at least ${
+    totalDays * config.targetObservationsPerDay
+  } observations during ${monthName}, 2024 ⁂`;
+  const emoji = "👀";
+
+  try {
+    return await createMonthlyKeyResultPage(
+      config.NOTION_TOKEN,
+      title,
+      totalDays,
+      [config.anchorNodeIds.meditateEveryDayObj],
+      WindmillStateContains.AUTO_OBSERVATIONS,
+      emoji,
+      Statuses.IN_PROGRESS,
+      year,
+      month
+    );
+  } catch (error) {
+    return { msg: "Unable to create new page" };
+  }
+}
+
 export {
   fetchDataAndComputeAggregates,
   MeditationAggregate,
   saveMeditationAggregatesToVault,
+  createMonthlyMeditationsKeyResult,
+  createMonthlyObservationsKeyResult,
 };
