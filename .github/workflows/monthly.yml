@@ -42,6 +42,22 @@ jobs:
         if: "${{ github.event.inputs.year == '' && github.event.inputs.month == '' }}"
         run: bun run cli create-monthly-workout-key-result
 
+      - name: "🧘 Create meditation key result for given month"
+        if: "${{ github.event.inputs.year != '' && github.event.inputs.month != '' }}"
+        run: bun run cli create-monthly-meditations-key-result -y ${{ github.event.inputs.year }} -m ${{ github.event.inputs.month }}
+
+      - name: "🧘 Create meditation key result for current month"
+        if: "${{ github.event.inputs.year == '' && github.event.inputs.month == '' }}"
+        run: bun run cli create-monthly-meditations-key-result
+
+      - name: "👀 Create observations key result for given month"
+        if: "${{ github.event.inputs.year != '' && github.event.inputs.month != '' }}"
+        run: bun run cli create-monthly-observations-key-result -y ${{ github.event.inputs.year }} -m ${{ github.event.inputs.month }}
+
+      - name: "👀 Create observations key result for current month"
+        if: "${{ github.event.inputs.year == '' && github.event.inputs.month == '' }}"
+        run: bun run cli create-monthly-observations-key-result
+
   deploy:
     name: "☁️"
     needs: [run-monthly-tasks]

@@ -12,7 +12,11 @@ import {
 } from "@src/sleep";
 import { getCurrentYear, getCurrentMonth } from "@src/time";
 import config from "@src/config";
-import { saveMeditationAggregatesToVault } from "./meditations";
+import {
+  saveMeditationAggregatesToVault,
+  createMonthlyObservationsKeyResult,
+  createMonthlyMeditationsKeyResult,
+} from "@src/meditations";
 
 program
   .command("set-current-value-of-workout-key-result")
@@ -52,6 +56,50 @@ program
     try {
       const { year, month } = options;
       const result = await createMonthlyWorkoutKeyResult(year, month);
+      console.log(result);
+    } catch (error) {
+      console.error("An error occurred:", error);
+    }
+  });
+
+program
+  .command("create-monthly-meditations-key-result")
+  .option(
+    "-y, --year <year>",
+    "Year for the workout key result",
+    getCurrentYear()
+  )
+  .option(
+    "-m, --month <month>",
+    "Month for the workout key result",
+    getCurrentMonth()
+  )
+  .action(async (options) => {
+    try {
+      const { year, month } = options;
+      const result = await createMonthlyMeditationsKeyResult(year, month);
+      console.log(result);
+    } catch (error) {
+      console.error("An error occurred:", error);
+    }
+  });
+
+program
+  .command("create-monthly-observations-key-result")
+  .option(
+    "-y, --year <year>",
+    "Year for the workout key result",
+    getCurrentYear()
+  )
+  .option(
+    "-m, --month <month>",
+    "Month for the workout key result",
+    getCurrentMonth()
+  )
+  .action(async (options) => {
+    try {
+      const { year, month } = options;
+      const result = await createMonthlyObservationsKeyResult(year, month);
       console.log(result);
     } catch (error) {
       console.error("An error occurred:", error);
