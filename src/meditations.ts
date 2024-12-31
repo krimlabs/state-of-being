@@ -1,4 +1,5 @@
 import {
+  updateNotionPage,
   computeFrequencies,
   WindmillStateContains,
   flattenList,
@@ -7,6 +8,7 @@ import {
   getObservationsForMonthAndYear,
   createMonthlyKeyResultPage,
   Statuses,
+  getNodeByWindmillState,
 } from "@src/notion";
 
 import {
@@ -464,10 +466,108 @@ async function createMonthlyObservationsKeyResult(
   }
 }
 
+async function setCurrentValueOfMeditationsKeyResult(
+  forYear?: number,
+  forMonth?: number
+) {
+  const year = forYear || getCurrentYear();
+  const month = forMonth || getCurrentMonth();
+
+  const searchTerm = `${WindmillStateContains.AUTO_MEDITATION}-${month}-${year}`;
+  const keyResult = await getNodeByWindmillState(
+    config.NOTION_TOKEN,
+    searchTerm
+  );
+
+  if (keyResult.results.length > 0) {
+    const id = keyResult.results[0].id;
+
+    const meditations = await getMeditationsForMonthAndYear(
+      config.NOTION_TOKEN,
+      month,
+      year
+    );
+    const newVal = meditations.length;
+
+    try {
+      await updateNotionPage(config.NOTION_TOKEN, id, {
+        properties: {
+          Current: {
+            number: newVal,
+          },
+        },
+      });
+      return {
+        msg: "Meditations key result current value updated",
+        newVal,
+        id,
+      };
+    } catch (error) {
+      return {
+        msg: "Unable to update meditations key result current value",
+        newVal,
+        id,
+      };
+    }
+  }
+
+  return { msg: `Key Result for ${searchTerm} does not exist yet` };
+}
+
+async function setCurrentValueOfObservationsKeyResult(
+  forYear?: number,
+  forMonth?: number
+) {
+  const year = forYear || getCurrentYear();
+  const month = forMonth || getCurrentMonth();
+
+  const searchTerm = `${WindmillStateContains.AUTO_OBSERVATIONS}-${month}-${year}`;
+  const keyResult = await getNodeByWindmillState(
+    config.NOTION_TOKEN,
+    searchTerm
+  );
+
+  if (keyResult.results.length > 0) {
+    const id = keyResult.results[0].id;
+
+    const observations = await getObservationsForMonthAndYear(
+      config.NOTION_TOKEN,
+      month,
+      year
+    );
+    const newVal = observations.length;
+
+    try {
+      await updateNotionPage(config.NOTION_TOKEN, id, {
+        properties: {
+          Current: {
+            number: newVal,
+          },
+        },
+      });
+      return {
+        msg: "Observations key result current value updated",
+        newVal,
+        id,
+      };
+    } catch (error) {
+      return {
+        msg: "Unable to update observations key result current value",
+        newVal,
+        id,
+      };
+    }
+  }
+
+  return { msg: `Key Result for ${searchTerm} does not exist yet` };
+}
+
 export {
   fetchDataAndComputeAggregates,
   MeditationAggregate,
   saveMeditationAggregatesToVault,
   createMonthlyMeditationsKeyResult,
   createMonthlyObservationsKeyResult,
+  setCurrentValueOfMeditationsKeyResult,
+  setCurrentValueOfObservationsKeyResult,
 };

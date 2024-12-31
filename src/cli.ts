@@ -16,19 +16,22 @@ import {
   saveMeditationAggregatesToVault,
   createMonthlyObservationsKeyResult,
   createMonthlyMeditationsKeyResult,
+  setCurrentValueOfMeditationsKeyResult,
+  setCurrentValueOfObservationsKeyResult,
 } from "@src/meditations";
 
+// Update the value of monthly key results, on a daily basis
 program
   .command("set-current-value-of-workout-key-result")
   .option(
     "-y, --year <year>",
     "Year for the workout key result",
-    getCurrentYear()
+    getCurrentYear().toString()
   )
   .option(
     "-m, --month <month>",
     "Month for the workout key result",
-    getCurrentMonth()
+    getCurrentMonth().toString()
   )
   .action(async (options) => {
     try {
@@ -41,16 +44,61 @@ program
   });
 
 program
-  .command("create-monthly-workout-key-result")
+  .command("set-current-value-of-meditations-key-result")
   .option(
     "-y, --year <year>",
     "Year for the workout key result",
-    getCurrentYear()
+    getCurrentYear().toString()
   )
   .option(
     "-m, --month <month>",
     "Month for the workout key result",
-    getCurrentMonth()
+    getCurrentMonth().toString()
+  )
+  .action(async (options) => {
+    try {
+      const { year, month } = options;
+      const result = await setCurrentValueOfMeditationsKeyResult(year, month);
+      console.log(result);
+    } catch (error) {
+      console.error("An error occurred:", error);
+    }
+  });
+
+program
+  .command("set-current-value-of-observations-key-result")
+  .option(
+    "-y, --year <year>",
+    "Year for the workout key result",
+    getCurrentYear().toString()
+  )
+  .option(
+    "-m, --month <month>",
+    "Month for the workout key result",
+    getCurrentMonth().toString()
+  )
+  .action(async (options) => {
+    try {
+      const { year, month } = options;
+      const result = await setCurrentValueOfObservationsKeyResult(year, month);
+      console.log(result);
+    } catch (error) {
+      console.error("An error occurred:", error);
+    }
+  });
+
+// Create monthly key results for meditations, workouts and observations
+program
+  .command("create-monthly-workout-key-result")
+  .option(
+    "-y, --year <year>",
+    "Year for the workout key result",
+    getCurrentYear().toString()
+  )
+  .option(
+    "-m, --month <month>",
+    "Month for the workout key result",
+    getCurrentMonth().toString()
   )
   .action(async (options) => {
     try {
@@ -67,12 +115,12 @@ program
   .option(
     "-y, --year <year>",
     "Year for the workout key result",
-    getCurrentYear()
+    getCurrentYear().toString()
   )
   .option(
     "-m, --month <month>",
     "Month for the workout key result",
-    getCurrentMonth()
+    getCurrentMonth().toString()
   )
   .action(async (options) => {
     try {
@@ -89,12 +137,12 @@ program
   .option(
     "-y, --year <year>",
     "Year for the workout key result",
-    getCurrentYear()
+    getCurrentYear().toString()
   )
   .option(
     "-m, --month <month>",
     "Month for the workout key result",
-    getCurrentMonth()
+    getCurrentMonth().toString()
   )
   .action(async (options) => {
     try {
@@ -147,12 +195,12 @@ program
   .option(
     "-y, --year <year>",
     "Year for which to compute aggregates",
-    getCurrentYear()
+    getCurrentYear().toString()
   )
   .option(
     "-m, --month <month>",
     "Month for which to compute aggregates",
-    getCurrentMonth()
+    getCurrentMonth().toString()
   )
   .action(async (options: { year?: number; month?: number }) => {
     try {

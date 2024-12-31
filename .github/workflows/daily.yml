@@ -44,6 +44,22 @@ jobs:
         if: "${{ github.event.inputs.year == '' && github.event.inputs.month == '' }}"
         run: bun run cli set-current-value-of-workout-key-result
 
+      - name: "🧘‍♂️ Fetch meditations value and set on Notion with given year and month"
+        if: "${{ github.event.inputs.year != '' && github.event.inputs.month != '' }}"
+        run: bun run cli set-current-value-of-meditations-key-result -y ${{ github.event.inputs.year }} -m ${{ github.event.inputs.month }}
+
+      - name: "‍🧘‍♂️ Fetch meditations value and set on Notion with current year and month"
+        if: "${{ github.event.inputs.year == '' && github.event.inputs.month == '' }}"
+        run: bun run cli set-current-value-of-meditations-key-result
+
+      - name: "👀 Fetch observations value and set on Notion with given year and month"
+        if: "${{ github.event.inputs.year != '' && github.event.inputs.month != '' }}"
+        run: bun run cli set-current-value-of-observations-key-result -y ${{ github.event.inputs.year }} -m ${{ github.event.inputs.month }}
+
+      - name: "‍👀 Fetch observations value and set on Notion with current year and month"
+        if: "${{ github.event.inputs.year == '' && github.event.inputs.month == '' }}"
+        run: bun run cli set-current-value-of-observations-key-result
+
       - name: "📃 Fetch workouts data and write to vault"
         run: bun run cli save-workout-stats-to-vault
 
