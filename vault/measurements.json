@@ -154,5 +154,47 @@
     "type": "weight",
     "value": 63.7,
     "unit": "kg"
+  },
+  {
+    "date": "2026-08-02",
+    "type": "belly",
+    "value": 86.5,
+    "unit": "cm"
+  },
+  {
+    "date": "2026-08-02",
+    "type": "calves",
+    "value": 35.5,
+    "unit": "cm"
+  },
+  {
+    "date": "2026-08-02",
+    "type": "chest",
+    "value": 92,
+    "unit": "cm"
+  },
+  {
+    "date": "2026-08-02",
+    "type": "shoulders",
+    "value": 108,
+    "unit": "cm"
+  },
+  {
+    "date": "2026-08-02",
+    "type": "thighs",
+    "value": 55,
+    "unit": "cm"
+  },
+  {
+    "date": "2026-08-02",
+    "type": "waist",
+    "value": 82.5,
+    "unit": "cm"
+  },
+  {
+    "date": "2026-08-02",
+    "type": "weight",
+    "value": 64.4,
+    "unit": "kg"
   }
 ]
