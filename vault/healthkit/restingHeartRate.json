@@ -1590,6 +1590,21 @@
       "qty": 54,
       "date": "2026-08-03 00:00:00 +0530",
       "source": "Ultrahuman"
+    },
+    {
+      "qty": 58,
+      "date": "2026-08-04 00:00:00 +0530",
+      "source": "Ultrahuman"
+    },
+    {
+      "qty": 55,
+      "date": "2026-08-05 00:00:00 +0530",
+      "source": "Ultrahuman"
+    },
+    {
+      "qty": 57,
+      "date": "2026-08-07 00:00:00 +0530",
+      "source": "Ultrahuman"
     }
   ]
 }
