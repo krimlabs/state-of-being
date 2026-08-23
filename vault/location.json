@@ -203,5 +203,10 @@
     "date": "2026-08-05",
     "city": "New Delhi",
     "country": "India"
+  },
+  {
+    "date": "2026-08-23",
+    "city": "",
+    "country": "Azerbaijan"
   }
 ]
